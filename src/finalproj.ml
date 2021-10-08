@@ -1,5 +1,6 @@
 (* Testing for final project *)
 
+(* PROBABLY NOT GOING TO USE THIS FILE *)
 let rec make_row num_column =
   match num_column with 0 -> "" | _ -> "[]" ^ make_row (num_column - 1)
 
@@ -16,7 +17,7 @@ let rec print_game num_rows num_column =
 
   (* WE NEED TO make matrix instead of using the above *)
 
-let test_matrix = Array.make_matrix 8 8;;
+(* let test_matrix = Array.make_matrix 8 8;;
 
-let print_matrix m = print_endline m;;
+let print_matrix m = print_endline m;; *)
 

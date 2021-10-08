@@ -1,1 +1,0 @@
-t = {turn:string; p1_captured:string list; p2_captured: string list}
