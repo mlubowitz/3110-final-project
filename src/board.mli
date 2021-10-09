@@ -14,8 +14,11 @@ val piece_location: string -> grid
 (** [piece_location p] is the location of piece [p] in the board. 
 Requires: [p] is an actual piece on the board. *)
 
-val move_piece: string -> grid -> board
+val move_piece: string -> grid -> board (*EDIT THISS*)
 (** [move_piece p n_loc] is the updated board with piece [p] moved to location [n_loc] *)
 
 val flip: board -> board
 (**[flip t] reverses the board [t] so that the top is now the bottom, and vice versa. *)
+
+val get_board: 
+(* return the board and not return the board *)
