@@ -1,34 +1,121 @@
-type piece =
+type piece_type =
   | Pawn
   | Rook
   | Knight
   | Bishop
   | Queen
   | King
-  | Empty
+  | None
+
+type color =
+  | White
+  | Black
+  | None
+
+type position = int * int
+
+type piece = {
+  piece_type : piece_type;
+  color : color;
+  position : position;
+  no_first_move : bool;
+}
 
 exception Illegal of string
 
-let to_piece = function
-  | "[P]"
+let to_piece (ori_loc : int * int) (n : string) : piece =
+  match n with
+  | "[P]" ->
+      {
+        piece_type = Pawn;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[R]" ->
+      {
+        piece_type = Rook;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[B]" ->
+      {
+        piece_type = Bishop;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[N]" ->
+      {
+        piece_type = Knight;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[Q]" ->
+      {
+        piece_type = Queen;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[K]" ->
+      {
+        piece_type = King;
+        color = Black;
+        position = ori_loc;
+        no_first_move = true;
+      }
   | "[p]" ->
-      Pawn
-  | "[R]"
+      {
+        piece_type = Pawn;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
   | "[r]" ->
-      Rook
-  | "[N]"
-  | "[n]" ->
-      Knight
-  | "[B]"
+      {
+        piece_type = Rook;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
   | "[b]" ->
-      Bishop
-  | "[Q]"
+      {
+        piece_type = Bishop;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | "[n]" ->
+      {
+        piece_type = Knight;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
   | "[q]" ->
-      Queen
-  | "[K]"
+      {
+        piece_type = Queen;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
   | "[k]" ->
-      King
-  | _ -> Empty
+      {
+        piece_type = King;
+        color = White;
+        position = ori_loc;
+        no_first_move = true;
+      }
+  | _ ->
+      {
+        piece_type = None;
+        color = None;
+        position = ori_loc;
+        no_first_move = false;
+      }
 
 let pawn_is_legal ori_loc new_loc = failwith "Unimplemented"
 
