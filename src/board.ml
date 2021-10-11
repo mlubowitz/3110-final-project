@@ -1,11 +1,84 @@
-open Pieces
+type t = string array array
 
+type grid = int * int
 
-let init_board () = [[]]
+let init_board () =
+  let b = Array.make_matrix 8 8 "[ ]" in
+  let () =
+    for x = 0 to 7 do
+      for i = 0 to 7 do
+        if x = 0 || x = 1 then b.(x).(i) <- "[P]"
+        else if x = 6 || x = 7 then b.(x).(i) <- "[p]"
+        else b.(x).(i) <- "[ ]"
+      done
+    done
+  in
+  Array.copy b
 
-type board = init_board()
+(* ============= move_piece is below =================================*)
 
-let piece_location p= p
+let move_piece board ori_loc new_loc =
+  let n_row = fst new_loc in
+  let n_col = snd new_loc in
+  let ori_row = fst ori_loc in
+  let ori_col = snd ori_loc in
+  let () = board.(n_row).(n_col) <- board.(ori_row).(ori_col) in
+  let () = board.(ori_row).(ori_col) <- "[ ]" in
+  Array.copy board
 
+(* ============= flip is below ======================================*)
 
-(* For pieces - how to differentiate between different pieces? How should I know what pieces are what? *)
+(* [flip_row row] is an Array with length 8 that is a copy of [row]
+   reversed. This is a helper to [flip].*)
+let flip_row row =
+  let new_ar_row = Array.make 8 "" in
+  let () =
+    for x = 0 to 7 do
+      new_ar_row.(x) <- row.(7 - x)
+    done
+  in
+  Array.copy new_ar_row
+
+let flip board =
+  (* need to reverse everything in row and reverse order of arrays in
+     array *)
+  let fl_brd = Array.make_matrix 8 8 "" in
+  let () =
+    for x = 0 to 7 do
+      fl_brd.(x) <- flip_row board.(7 - x)
+    done
+  in
+  Array.copy fl_brd
+
+(* =========== print_board is below ==================================*)
+
+(* [get_row_str row last_ind] is a string version of [row]. This is a
+   helper to [ar_to_str].*)
+let rec get_row_str row last_ind =
+  (* board.(row) is the array that we are turning into string *)
+  match last_ind with
+  | -1 -> " "
+  | x -> get_row_str (Array.sub row 0 x) (x - 1) ^ row.(x)
+
+(* [ar_to_str board str_board] mutates str_board so that it contains the
+   string versions of the array rows that were in [board]. This is a
+   helper to [print_board]*)
+let ar_to_str board str_board =
+  for x = 0 to 7 do
+    str_board.(x) <- get_row_str board.(x) 7
+    (*7 (last arg of get_row_str) is the index of last element*)
+  done
+
+let print_board board =
+  let str_board = Array.make 8 "" in
+  let () = ar_to_str board str_board in
+  for x = 0 to 7 do
+    print_endline str_board.(x)
+  done
+
+(* ================================================================== *)
+
+(* PIECE MOVEMENT THOUGHT - INPUT THE CURRENT POSITION OF THE PIECE AND
+   NEW POSITION OF PIECE. THEN PIECES.ML WILL CHECK IF THAT IS A LEGAL
+   MOVE AND CALL MOVE_PIECE IN BOARD TO UPDATE THE BOARD IF IT IS
+   LEGAL*)
