@@ -1,5 +1,3 @@
 (executable
  (name main)
- (libraries Chess))
-
-; Use ANSITermainal?
+ (libraries Chess ANSITerminal))
