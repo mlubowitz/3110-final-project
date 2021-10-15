@@ -5,8 +5,6 @@
     board and allows printing of the board to show the board in a clean
     and clear way.*)
 
-(* Author: Chris Kim *)
-
 type t
 (**The abstract type representing an 8 x 8 chess board. *)
 
@@ -21,18 +19,22 @@ val init_board : unit -> t
 
 val move_piece : t -> grid -> grid -> t
 (** [move_piece board ori_loc new_loc] is an updated board with the
-    piece at [ori_loc] moved to location [new_loc]. While this function
-    does return a new board, it also mutates the original [board] that
-    is passed in as an argument, so it is possible to use the original
-    [board] again in future code without assigning the output of
-    [move_piece] to another identifer.*)
+    piece at [ori_loc] moved to location [new_loc]. The location
+    [ori_loc] is set to an empty grid (no piece on it).*)
 
 val flip : t -> t
-(**[flip b] reverses the board [b] so that the top is now the bottom,
+(**[flip b] is a reversed board [b] so that the top is now the bottom,
    and vice versa. It also reverses the contents of rows, so [flip b] is
-   essentially the same as if you rotated the board 180 degrees. This
-   function does not mutate the board passed in as an argument. Instead,
-   it returns a completely new board.*)
+   essentially the same as if you rotated the board 180 degrees. *)
 
 val print_board : t -> unit
 (** [print_board b] prints the board as a series of strings. *)
+
+val get_str_piece : t -> grid -> string
+(**[to_piece b l] is the piece (represented as a string) at location [l]
+   in board [b].*)
+
+val get_row : t -> int -> string list
+(**[get_row b r] is a list of the pieces (represented as strings) of row
+   [r] in board [b] in the order that they appear in [r] (left to
+   right).*)
