@@ -76,9 +76,18 @@ let print_board board =
     print_endline str_board.(x)
   done
 
-(* ================================================================== *)
+(* ==================get_str_piece======================================== *)
 
-(* PIECE MOVEMENT THOUGHT - INPUT THE CURRENT POSITION OF THE PIECE AND
-   NEW POSITION OF PIECE. THEN PIECES.ML WILL CHECK IF THAT IS A LEGAL
-   MOVE AND CALL MOVE_PIECE IN BOARD TO UPDATE THE BOARD IF IT IS
-   LEGAL*)
+let get_str_piece board loc =
+  match loc with
+  | x, y -> board.(x).(y)
+
+(* ==================get_row======================================== *)
+
+let get_row board row =
+  let rec make_lst ind =
+    match ind with
+    | 8 -> []
+    | x -> board.(row).(x) :: make_lst (x + 1)
+  in
+  make_lst 0
