@@ -7,8 +7,8 @@ let init_board () =
   let () =
     for x = 0 to 7 do
       for i = 0 to 7 do
-        if x = 0 || x = 1 then b.(x).(i) <- "[P]"
-        else if x = 6 || x = 7 then b.(x).(i) <- "[p]"
+        if x = 1 then b.(x).(i) <- "[P]"
+        else if x = 6 then b.(x).(i) <- "[p]"
         else b.(x).(i) <- "[ ]"
       done
     done
