@@ -2,8 +2,8 @@ open OUnit2
 open Chess
 open Board
 
-let piece_location_test name piece expected =
-  name >:: fun _ -> assert_equal expected (piece_location piece)
+(* let piece_location_test name piece expected = name >:: fun _ ->
+   assert_equal expected (piece_location piece) *)
 
 let pieces_tests = []
 
