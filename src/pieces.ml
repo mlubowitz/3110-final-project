@@ -117,7 +117,23 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         no_first_move = false;
       }
 
-let pawn_is_legal ori_loc new_loc = failwith "Unimplemented"
+let pawn_legal_move (p : piece) new_loc =
+  match (p.position, new_loc, p.color) with
+  | (initCol, initRow), (newCol, newRow), White ->
+      newRow - initRow = -1 || (newRow - initRow = -2 && p.no_first_move)
+  | (initCol, initRow), (newCol, newRow), Black ->
+      newRow - initRow = 1 || (newRow - initRow = 2 && p.no_first_move)
+  | _, _, _ -> false
+
+let pawn_legal_capture (p : piece) new_loc =
+  match (p.location, new_loc, p.color) with
+  | (initCol, initRow), (newCol, newRow), White ->
+      newRow - initRow = -1
+      && (newCol - initCol = -1 || newCol - initCol = 1)
+  | (initCol, initRow), (newCol, newRow), Black ->
+      newRow - initRow = 1
+      && (newCol - initCol = -1 || newCol - initCol = 1)
+  | _, _, _ -> false
 
 let rook_is_legal ori_loc new_loc =
   (fst new_loc <> fst ori_loc && snd new_loc = snd ori_loc)
