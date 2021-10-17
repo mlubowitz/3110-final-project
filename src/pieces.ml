@@ -126,7 +126,7 @@ let pawn_legal_move (p : piece) new_loc =
   | _, _, _ -> false
 
 let pawn_legal_capture (p : piece) new_loc =
-  match (p.location, new_loc, p.color) with
+  match (p.position, new_loc, p.color) with
   | (initCol, initRow), (newCol, newRow), White ->
       newRow - initRow = -1
       && (newCol - initCol = -1 || newCol - initCol = 1)
@@ -161,7 +161,7 @@ let is_legal piece ori_loc new_loc =
   else
     let piece = to_piece ori_loc piece in
     match piece.piece_type with
-    | Pawn -> pawn_is_legal piece.position new_loc
+    | Pawn -> pawn_legal_move piece new_loc
     | Rook -> rook_is_legal piece.position new_loc
     | Knight -> knight_is_legal piece.position new_loc
     | Bishop -> bishop_is_legal piece.position new_loc
