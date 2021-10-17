@@ -9,8 +9,7 @@ open Pieces
 let str_to_grid str =
   (int_of_char str.[1] - 48, int_of_char str.[3] - 48)
 
-let rec can_move state brd input dest =
-  let piece = what_piece state input in
+let rec can_move brd piece dest =
   let can_go = is_legal piece dest in
   if can_go then dest
   else
@@ -20,9 +19,10 @@ let rec can_move state brd input dest =
          location."
     in
     let new_dest = read_line () |> str_to_grid in
-    can_move state brd input new_dest
+    can_move brd piece new_dest
 
-let rec play_game brd state =
+let rec play_game brd =
+  let state = init_state brd in
   let () = print_endline "Current board:" in
   let () = print_board brd in
   let () =
@@ -39,9 +39,9 @@ let rec play_game brd state =
        right is (7,7)."
   in
   let dest = read_line () |> str_to_grid in
-  (* Input validty should be checked earlier, can_move checks if move to
-     dest is legal and if not asks for new dest and reassignes dest*)
-  let dest = can_move state brd input dest in
+  let piece = what_piece state input in
+  let dest = can_move brd piece dest in
+  (* update board *)
   let brd = move_piece brd input dest in
   let () = print_endline "Move complete:" in
   let () = print_board brd in
@@ -51,15 +51,15 @@ let rec play_game brd state =
   let () = print_board brd in
   let () = print_endline "Keep playing? y or n (must be lowercase)" in
   let keep_play = read_line () in
-  if keep_play = "y" then play_game brd state
-  else print_endline "Goodbye"
+  if keep_play = "y" then play_game brd else print_endline "Goodbye"
 
 let main () =
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\nWelcome to Extremely Simple Chess.\n";
   let board = init_board () in
-  let state = init_state board in
-  let play = play_game board state in
+  let play = play_game board in
   play
 
 let () = main ()
+
+(*note to self - state when board flips - need to consider! *)

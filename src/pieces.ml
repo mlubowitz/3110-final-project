@@ -120,9 +120,13 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
 let pawn_legal_move (p : piece) new_loc =
   match (p.position, new_loc, p.color) with
   | (initRow, initCol), (newRow, newCol), White ->
-      newRow - initRow = -1 || (newRow - initRow = -2 && p.no_first_move)
-  | (initCol, initRow), (newCol, newRow), Black ->
-      newRow - initRow = 1 || (newRow - initRow = 2 && p.no_first_move)
+      initCol = newCol
+      && (newRow - initRow = -1
+         || (newRow - initRow = -2 && p.no_first_move))
+  | (initRow, initCol), (newRow, newCol), Black ->
+      initCol = newCol
+      && (newRow - initRow = -1
+         || (newRow - initRow = -2 && p.no_first_move))
   | _, _, _ -> false
 
 let pawn_legal_capture (p : piece) new_loc =
