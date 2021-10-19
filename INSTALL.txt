@@ -15,4 +15,20 @@ exactly can result in exceptions and a crash.
 
 
 How to view the graphics we have so far:
-1. 
+
+1. Download the graphics library using "opam install graphics"
+
+2. Download the X11 display program, you can down it from here:
+   https://www.xquartz.org/ for macOS or here 
+   https://sourceforge.net/projects/xming/
+   for Windows. 
+
+3. In Utop "cd" into the src folder of this game.
+
+4. Open Utop and input #require "graphics";;.
+
+5. Then input #use "gui.ml";;. You should see a new window
+   with a chess board. 
+
+6. Do not close using the red x button on the window. Instead you must type 
+   Graphics.close_graph();; in Utop. 
