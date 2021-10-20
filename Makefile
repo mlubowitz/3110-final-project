@@ -18,3 +18,6 @@ clean: dune clean
 doc: dune build @doc
 
 launch: OCAMLRUNPARAM=b dune exec src/gui.exe
+
+zip: 
+  zip -r chess.zip . -x@exclude.lst
