@@ -5,7 +5,7 @@ type rectangle = string
 
 let color_rec x y s b = 
   draw_rect  x y s s;
-  if b then set_color black else set_color (rgb 231 237 233);
+  if b then set_color (rgb 69 69 67) else set_color (rgb 231 237 233);
   fill_rect x y s s;;
 
 let rec draw_matrix_rows x y s row bl = 
