@@ -1,18 +1,19 @@
 For MS1, we have a very simple chess game run in ANSITerminal that
-has only pawns and obeys movement rules for pawns. 
+has only pawns and obeys general movement rules for pawns. 
 
 ----------------------------------------------------
 How to run our Chess game for MS1 with ANSITerminal:
 1. Ensure you have ANSITerminal installed. If you don't have ANSITerminal,
-please install with opam.
+please install with opam. You will also need to install the OCaml graphics library
+to avoid "Unbound module" erros. Install using "opam install graphics".
 
-2. Download all game files onto computer.
+2. Download the folder with all game files onto computer.
 
-3. Open a terminal window and type "make play" after navigating to the root directory
-of the game. Press enter.
+3. Open a terminal window and navigatie to the root directory
+of the game. Type "make play" and press enter.
 
-4. Follow directions of game carefully. Currently, not following directions
-exactly can result in exceptions and a crash.
+4. Follow directions of game carefully. Not following directions
+exactly can result in exceptions and a crash (at least currently).
 
 ----------------------------------------------------
 How to view the graphics we have so far:

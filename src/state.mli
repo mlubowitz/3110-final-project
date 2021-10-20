@@ -22,4 +22,5 @@ val update_loc : t -> int * int -> Pieces.piece -> t
 (* NOTE: To completely update the state after a move on the board, you
    have to call update_loc twice - once to set the destination location
    to a new piece and again to set the original location to a none piece
-   (or whatever should be in the original location) *)
+   (or whatever should be in the original location). Alternatively, call
+   init_state on the updated board.*)
