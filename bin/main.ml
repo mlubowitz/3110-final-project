@@ -10,16 +10,30 @@ let str_to_grid str =
   (int_of_char str.[1] - 48, int_of_char str.[3] - 48)
 
 let rec can_move brd piece dest =
-  let can_go = is_legal piece dest in
-  if can_go then dest
-  else
-    let () =
-      print_endline
-        "Cannot move to that location. Input a new destination \
-         location."
-    in
-    let new_dest = read_line () |> str_to_grid in
-    can_move brd piece new_dest
+  match is_legal piece dest with
+  | true -> dest
+  | false ->
+      let () =
+        print_endline
+          "Cannot move to that location. Input a new destination \
+           location."
+      in
+      let new_dest = read_line () |> str_to_grid in
+      can_move brd piece new_dest
+
+let rec check_input state input =
+  let piece = what_piece state input in
+  match is_legal piece input with
+  | true
+  | false ->
+      input
+  | exception Illegal x ->
+      let () =
+        print_endline
+          "Not valid piece. Input location of piece you want to select."
+      in
+      let new_selection = read_line () |> str_to_grid in
+      check_input state new_selection
 
 let rec play_game brd =
   let state = init_state brd in
@@ -29,14 +43,15 @@ let rec play_game brd =
     print_endline
       "Input the location of the PIECE YOU WANT TO MOVE in EXACT \
        format (row,column). Upper left is (0,0) and bottom right is \
-       (7,7)."
+       (7,7). NO SPACES!"
   in
   let input = read_line () |> str_to_grid in
+  let input = check_input state input in
   let () =
     print_endline
       "Input the location TO WHICH YOU WANT TO MOVE that piece in \
        EXACT format (row, column). Upper left is (0,0) and bottom \
-       right is (7,7)."
+       right is (7,7). NO SPACES!"
   in
   let dest = read_line () |> str_to_grid in
   let piece = what_piece state input in
@@ -49,8 +64,11 @@ let rec play_game brd =
   let () = print_endline "" in
   let () = print_endline "Next player - board flipped: " in
   let () = print_board brd in
-  let () = print_endline "Keep playing? y or n (must be lowercase)" in
-  let keep_play = read_line () in
+  let () =
+    print_endline "";
+    print_endline "Keep playing? y or n"
+  in
+  let keep_play = read_line () |> String.lowercase_ascii in
   if keep_play = "y" then play_game brd else print_endline "Goodbye"
 
 let main () =
