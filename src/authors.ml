@@ -4,4 +4,4 @@ let hours_worked_vr = -1
 
 let hours_worked_cjk = 11
 
-let hours_worked_bcz = -1
+let hours_worked_bcz = 7
