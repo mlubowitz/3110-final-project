@@ -4,8 +4,9 @@ has only pawns and obeys general movement rules for pawns.
 ----------------------------------------------------
 How to run our Chess game for MS1 with ANSITerminal:
 1. Ensure you have ANSITerminal installed. If you don't have ANSITerminal,
-please install with opam. You will also need to install the OCaml graphics library
-to avoid "Unbound module" erros. Install using "opam install graphics".
+please install with opam using "opam install graphics". You will also need to
+install the OCaml graphics library to avoid "Unbound module" errors. Install
+using "opam install graphics".
 
 2. Download the folder with all game files onto computer.
 

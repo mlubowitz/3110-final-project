@@ -50,8 +50,8 @@ let rec play_game brd =
   let () =
     print_endline
       "Input the location TO WHICH YOU WANT TO MOVE that piece in \
-       EXACT format (row, column). Upper left is (0,0) and bottom \
-       right is (7,7). NO SPACES!"
+       EXACT format (row,column). Upper left is (0,0) and bottom right \
+       is (7,7). NO SPACES!"
   in
   let dest = read_line () |> str_to_grid in
   let piece = what_piece state input in
