@@ -14,8 +14,8 @@ type grid = int * int
    right grid. *)
 
 val init_board : unit -> t
-(**[init_board ()] is the initial chess board with only 8 pawns on
-   either side of the board (in their normal position). *)
+(**[init_board ()] is the initial chess board with 16 pieces on either
+   side. Black pieces on top and white on bottom. *)
 
 val move_piece : t -> grid -> grid -> t
 (** [move_piece board ori_loc new_loc] is an updated board with the
