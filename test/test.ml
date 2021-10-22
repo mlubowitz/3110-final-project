@@ -21,7 +21,8 @@ let test_board = init_board ()
 
 let board_tests =
   [
-    get_str_piece_test "test row 0" test_board (0, 0) "[ ]";
+    (* I know test names are not very descriptive right now. *)
+    get_str_piece_test "test row 0" test_board (0, 0) "[R]";
     get_str_piece_test "test row 1" test_board (1, 5) "[P]";
     get_str_piece_test "test row 1" test_board (1, 2) "[P]";
     get_str_piece_test "test row 2" test_board (2, 5) "[ ]";
@@ -31,15 +32,17 @@ let board_tests =
     get_str_piece_test "test row 5" test_board (5, 3) "[ ]";
     get_str_piece_test "test row 6" test_board (6, 7) "[p]";
     get_str_piece_test "test row 6" test_board (6, 6) "[p]";
-    get_str_piece_test "test row 7" test_board (7, 7) "[ ]";
+    get_str_piece_test "test row 7" test_board (7, 7) "[r]";
     (* Violate encapsulation? Should not know what strings look like?
        But it is printed out in our terminal representation *)
-    get_row_test "test row 7" test_board 7
-      [ "[ ]"; "[ ]"; "[ ]"; "[ ]"; "[ ]"; "[ ]"; "[ ]"; "[ ]" ];
-    get_row_test "test row 6" test_board 6
+    get_row_test "get list of pieces in row 7" test_board 7
+      [ "[r]"; "[n]"; "[b]"; "[q]"; "[k]"; "[b]"; "[n]"; "[r]" ];
+    get_row_test "get list of pieces in row 6" test_board 6
       [ "[p]"; "[p]"; "[p]"; "[p]"; "[p]"; "[p]"; "[p]"; "[p]" ];
-    get_row_test "test row 1" test_board 1
+    get_row_test "get list of pieces in row 1" test_board 1
       [ "[P]"; "[P]"; "[P]"; "[P]"; "[P]"; "[P]"; "[P]"; "[P]" ];
+    get_row_test "get list of pieces in row 0" test_board 0
+      [ "[R]"; "[N]"; "[B]"; "[Q]"; "[K]"; "[B]"; "[N]"; "[R]" ];
   ]
 
 let tests =

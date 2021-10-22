@@ -2,14 +2,46 @@ type t = string array array
 
 type grid = int * int
 
+(* [right_piece row col color] is the piece that is in [row] and [col]
+   in the starting chess board. Uppercase is black. Requires: [row and
+   col are ints in range 0..7].*)
+let right_piece row col color =
+  let str_piece =
+    match row with
+    | 1
+    | 6 ->
+        "P"
+    | 0
+    | 7 -> begin
+        match col with
+        | 0
+        | 7 ->
+            "R"
+        | 1
+        | 6 ->
+            "N"
+        | 2
+        | 5 ->
+            "B"
+        | 3 -> "Q"
+        | 4 -> "K"
+        | _ -> failwith "Precondition violated"
+      end
+    | _ -> failwith "Precondition violated"
+  in
+  if color = "black" then "[" ^ str_piece ^ "]"
+  else "[" ^ String.lowercase_ascii str_piece ^ "]"
+
 let init_board () =
   let b = Array.make_matrix 8 8 "[ ]" in
   let () =
-    for x = 0 to 7 do
-      for i = 0 to 7 do
-        if x = 1 then b.(x).(i) <- "[P]"
-        else if x = 6 then b.(x).(i) <- "[p]"
-        else b.(x).(i) <- "[ ]"
+    for row = 0 to 7 do
+      for col = 0 to 7 do
+        if row = 0 || row = 1 then
+          b.(row).(col) <- right_piece row col "black"
+        else if row = 6 || row = 7 then
+          b.(row).(col) <- right_piece row col "white"
+        else b.(row).(col) <- "[ ]"
       done
     done
   in
