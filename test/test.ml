@@ -59,8 +59,6 @@ let test_st = get_state test_board
 
 let state_tests =
   [
-    (* vertical_path_empty, horizonantal_path_empty,vertical_path_empty
-       returns true if nothing in between *)
     is_path_empty_test "vert-nothing in btwn-going up" test_st (5, 7)
       (3, 7) true;
     is_path_empty_test "vert-nothing in btwn-going down" test_st (1, 5)
