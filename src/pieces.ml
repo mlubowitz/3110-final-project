@@ -23,6 +23,8 @@ type piece = {
 
 exception Illegal of string
 
+let no_piece (p : piece) = p.piece_type = None
+
 let to_piece (ori_loc : int * int) (n : string) : piece =
   match n with
   | "[P]" ->
