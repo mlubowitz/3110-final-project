@@ -81,9 +81,9 @@ let rec horizontal_path_empty
     match no_piece (what_piece st (fst loc1, snd loc1 + 1)) with
     | true -> horizontal_path_empty st (fst loc1, snd loc1 + 1) loc2
     | false -> false
-  else if snd loc2 < snd loc1 - 1 then
-    match no_piece (what_piece st (fst loc2, snd loc2 + 1)) with
-    | true -> horizontal_path_empty st (fst loc2, snd loc2 + 1) loc1
+  else if snd loc1 > snd loc2 + 1 then
+    match no_piece (what_piece st (fst loc1, snd loc1 - 1)) with
+    | true -> horizontal_path_empty st (fst loc1, snd loc1 - 1) loc2
     | false -> false
   else true
 
