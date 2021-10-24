@@ -36,7 +36,7 @@ let rec check_input state input =
       check_input state new_selection
 
 let rec play_game brd =
-  let state = init_state brd in
+  let state = get_state brd in
   let () = print_endline "Current board:" in
   let () = print_board brd in
   let () =

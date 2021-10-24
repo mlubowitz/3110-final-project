@@ -21,7 +21,7 @@ let rec r_to_dict board num_el row_num : t =
         to_piece (row_num, x) (get_str_piece board (row_num, x)) )
       :: r_to_dict board (num_el + 1) row_num
 
-let init_state board : t =
+let get_state board : t =
   let rec make_dict row_ind =
     match row_ind with
     | 8 -> []
