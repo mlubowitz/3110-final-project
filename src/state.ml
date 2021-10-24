@@ -49,3 +49,69 @@ let rec update_loc (st : t) (loc : int * int) pce : t =
   | (l, p) :: t ->
       if l = loc then (l, pce) :: update_loc t loc pce
       else (l, p) :: update_loc t loc pce
+
+let verticle_move (loc1 : int * int) (loc2 : int * int) =
+  snd loc1 = snd loc2 && fst loc1 != fst loc2
+
+let horizontal_move (loc1 : int * int) (loc2 : int * int) =
+  snd loc1 != snd loc2 && fst loc1 = snd loc2
+
+let diagonal_move (loc1 : int * int) (loc2 : int * int) =
+  abs (fst loc1 - fst loc2) = abs (snd loc1 - snd loc2)
+
+let rec verticle_path_empty
+    (st : t)
+    (loc1 : int * int)
+    (loc2 : int * int) =
+  if fst loc1 > fst loc2 + 1 then
+    match no_piece (what_piece st (fst loc1 - 1, snd loc1)) with
+    | true -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
+    | false -> false
+  else if fst loc2 > fst loc1 + 1 then
+    match no_piece (what_piece st (fst loc2 - 1, snd loc2)) with
+    | true -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
+    | false -> false
+  else true
+
+let rec horizontal_path_empty
+    (st : t)
+    (loc1 : int * int)
+    (loc2 : int * int) =
+  if snd loc1 < snd loc2 - 1 then
+    match no_piece (what_piece st (fst loc1, snd loc1 + 1)) with
+    | true -> horizontal_path_empty st (fst loc1, snd loc1 + 1) loc2
+    | false -> false
+  else if snd loc2 < snd loc1 - 1 then
+    match no_piece (what_piece st (fst loc2, snd loc2 + 1)) with
+    | true -> horizontal_path_empty st (fst loc2, snd loc2 + 1) loc1
+    | false -> false
+  else true
+
+let rec diagonal_path_empty
+    (st : t)
+    (loc1 : int * int)
+    (loc2 : int * int) =
+  if fst loc1 < fst loc2 - 1 && snd loc1 < snd loc2 - 1 then
+    match no_piece (what_piece st (fst loc1 + 1, snd loc1 + 1)) with
+    | true -> diagonal_path_empty st (fst loc1 + 1, snd loc1 + 1) loc2
+    | false -> false
+  else if fst loc1 < fst loc2 - 1 && snd loc1 > snd loc2 + 1 then
+    match no_piece (what_piece st (fst loc1 + 1, snd loc1 - 1)) with
+    | true -> diagonal_path_empty st (fst loc1 + 1, snd loc1 - 1) loc2
+    | false -> false
+  else if fst loc1 > fst loc2 + 1 && snd loc1 > snd loc2 + 1 then
+    match no_piece (what_piece st (fst loc1 - 1, snd loc1 - 1)) with
+    | true -> diagonal_path_empty st (fst loc1 - 1, snd loc1 - 1) loc2
+    | false -> false
+  else if fst loc1 > fst loc2 + 1 && snd loc1 < snd loc2 - 1 then
+    match no_piece (what_piece st (fst loc1 - 1, snd loc1 + 1)) with
+    | true -> diagonal_path_empty st (fst loc1 - 1, snd loc1 + 1) loc2
+    | false -> false
+  else true
+
+let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
+  if verticle_move loc1 loc2 then verticle_path_empty st loc1 loc2
+  else if horizontal_move loc1 loc2 then
+    horizontal_path_empty st loc1 loc2
+  else if diagonal_move loc1 loc2 then diagonal_path_empty st loc1 loc2
+  else true

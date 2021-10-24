@@ -1,4 +1,4 @@
-let hours_worked_ml = 6
+let hours_worked_ml = 9
 
 let hours_worked_vr = 9
 

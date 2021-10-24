@@ -6,6 +6,8 @@
 exception Illegal of string
 
 type piece
+
+val no_piece : piece -> bool
 (** The abstract type of values representing game pieces. *)
 
 val to_piece : int * int -> string -> piece
