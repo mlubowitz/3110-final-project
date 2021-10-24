@@ -15,7 +15,9 @@ val what_piece : t -> int * int -> Pieces.piece
 (**[what_piece st l] is the piece at location [l] in state [st]. Raises
    [InvalidLocation l] if [l] is not in the board. *)
 
-(*val state_blocked:*)
+val is_path_empty : t -> int * int -> int * int -> bool
+(**[is_path_empty st l1 l2] is true if path from location [l1] to [l2]
+   is empty, false otherwise. *)
 
 (* Update function is unnecessary - just call get_state *)
 (* val update_loc : t -> int * int -> Pieces.piece -> t (** [update_loc

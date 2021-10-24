@@ -54,7 +54,7 @@ let verticle_move (loc1 : int * int) (loc2 : int * int) =
   snd loc1 = snd loc2 && fst loc1 != fst loc2
 
 let horizontal_move (loc1 : int * int) (loc2 : int * int) =
-  snd loc1 != snd loc2 && fst loc1 = snd loc2
+  snd loc1 != snd loc2 && fst loc1 = fst loc2
 
 let diagonal_move (loc1 : int * int) (loc2 : int * int) =
   abs (fst loc1 - fst loc2) = abs (snd loc1 - snd loc2)
