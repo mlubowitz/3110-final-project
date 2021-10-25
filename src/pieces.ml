@@ -21,6 +21,8 @@ type piece = {
   no_first_move : bool;
 }
 
+let get_color p = p.color
+
 exception Illegal of string
 
 let no_piece (p : piece) = p.piece_type = None
@@ -119,27 +121,15 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         no_first_move = false;
       }
 
-let pawn_legal_move (p : piece) new_loc =
-  match (p.position, new_loc, p.color) with
-  | (initRow, initCol), (newRow, newCol), White ->
+let pawn_legal_move (p : piece) (p2 : piece) =
+  match (p.position, p2.position, p2.color) with
+  | (initRow, initCol), (newRow, newCol), None ->
       initCol = newCol
       && (newRow - initRow = -1
          || (newRow - initRow = -2 && p.no_first_move))
-  | (initRow, initCol), (newRow, newCol), Black ->
-      initCol = newCol
-      && (newRow - initRow = -1
-         || (newRow - initRow = -2 && p.no_first_move))
-  | _, _, _ -> false
-
-let pawn_legal_capture (p : piece) new_loc =
-  match (p.position, new_loc, p.color) with
-  | (initCol, initRow), (newCol, newRow), White ->
+  | (initRow, initCol), (newRow, newCol), _ ->
       newRow - initRow = -1
       && (newCol - initCol = -1 || newCol - initCol = 1)
-  | (initCol, initRow), (newCol, newRow), Black ->
-      newRow - initRow = 1
-      && (newCol - initCol = -1 || newCol - initCol = 1)
-  | _, _, _ -> false
 
 let rook_is_legal ori_loc new_loc =
   (fst new_loc <> fst ori_loc && snd new_loc = snd ori_loc)
@@ -159,21 +149,21 @@ let king_is_legal ori_loc new_loc =
 
 let id x = x
 
-let is_legal (p : piece) new_loc =
-  if
-    fst new_loc < 0
-    || snd new_loc < 0
-    || fst new_loc > 7
-    || snd new_loc > 7
-  then false
+let is_legal (p : piece) (p2 : piece) =
+  if p.color = p2.color then false
   else
     (* let piece = (what_piece st ori_loc) |> id in match
        piece.piece_type with *)
     match p.piece_type with
-    | Pawn -> pawn_legal_move p new_loc
-    | Rook -> rook_is_legal p.position new_loc
-    | Knight -> knight_is_legal p.position new_loc
-    | Bishop -> bishop_is_legal p.position new_loc
-    | Queen -> queen_is_legal p.position new_loc
-    | King -> king_is_legal p.position new_loc
+    | Pawn -> pawn_legal_move p p2
+    | Rook -> rook_is_legal p.position p2.position
+    | Knight -> knight_is_legal p.position p2.position
+    | Bishop -> bishop_is_legal p.position p2.position
+    | Queen -> queen_is_legal p.position p2.position
+    | King -> king_is_legal p.position p2.position
     | None -> raise (Illegal "The original location has no piece.")
+
+let first_move (p : piece) = { p with no_first_move = false }
+
+let new_loc_piece (p : piece) (new_loc : int * int) =
+  { p with position = new_loc }
