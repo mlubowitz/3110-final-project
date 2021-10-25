@@ -54,8 +54,9 @@ let is_path_empty_test name state ori_loc new_loc expected =
     (is_path_empty state ori_loc new_loc)
     ~printer:string_of_bool
 
-(* Test state *)
-let test_st = get_state test_board
+(* Get the state of the board we created above (board with pieces in
+   initial layout) *)
+let test_st = init_state test_board
 
 let state_tests =
   [

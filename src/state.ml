@@ -21,7 +21,7 @@ let rec r_to_dict board num_el row_num : t =
         to_piece (row_num, x) (get_str_piece board (row_num, x)) )
       :: r_to_dict board (num_el + 1) row_num
 
-let get_state board : t =
+let init_state board : t =
   let rec make_dict row_ind =
     match row_ind with
     | 8 -> []
@@ -50,6 +50,7 @@ let rec update_loc (st : t) (loc : int * int) pce : t =
       if l = loc then (l, pce) :: update_loc t loc pce
       else (l, p) :: update_loc t loc pce
 
+(* ==================is_path_empty======================================== *)
 let verticle_move (loc1 : int * int) (loc2 : int * int) =
   snd loc1 = snd loc2 && fst loc1 != fst loc2
 
@@ -59,6 +60,9 @@ let horizontal_move (loc1 : int * int) (loc2 : int * int) =
 let diagonal_move (loc1 : int * int) (loc2 : int * int) =
   abs (fst loc1 - fst loc2) = abs (snd loc1 - snd loc2)
 
+(* [verticle_path_empty st loc1 loc2] is true if path from [loc1] to
+   [loc2] has no pieces. Otherwise false. This is a hlper to
+   [is_path_empty] *)
 let rec verticle_path_empty
     (st : t)
     (loc1 : int * int)
@@ -73,6 +77,9 @@ let rec verticle_path_empty
     | false -> false
   else true
 
+(* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
+   [loc2] has no pieces. Otherwise false. This is a hlper to
+   [is_path_empty] *)
 let rec horizontal_path_empty
     (st : t)
     (loc1 : int * int)
@@ -87,6 +94,9 @@ let rec horizontal_path_empty
     | false -> false
   else true
 
+(* [diagonal_path_empty st loc1 loc2] is true if path from [loc1] to
+   [loc2] has no pieces. Otherwise false. This is a hlper to
+   [is_path_empty] *)
 let rec diagonal_path_empty
     (st : t)
     (loc1 : int * int)
