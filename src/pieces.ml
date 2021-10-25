@@ -135,7 +135,11 @@ let rook_is_legal ori_loc new_loc =
   (fst new_loc <> fst ori_loc && snd new_loc = snd ori_loc)
   || (snd new_loc <> snd ori_loc && fst new_loc = fst ori_loc)
 
-let knight_is_legal ori_loc new_loc = failwith "Unimplemented"
+let knight_is_legal ori_loc new_loc =
+  abs (fst new_loc - fst ori_loc) = 2
+  && abs (snd new_loc - snd ori_loc) = 1
+  || abs (snd new_loc - snd ori_loc) = 2
+     && abs (fst new_loc - fst ori_loc) = 1
 
 let bishop_is_legal ori_loc new_loc =
   abs (fst new_loc - fst ori_loc) = abs (snd new_loc - snd ori_loc)
