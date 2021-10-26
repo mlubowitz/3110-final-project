@@ -60,9 +60,8 @@ let rec get_select_pce_loc state =
 (* ================================================================== *)
 (* =======================END HELPER FUNCTIONS======================= *)
 
-(* THE MAIN FUNCTION FOR GAMEPLAY. Comments hopefully help reveal what's
-   going on. *)
-let rec play_game brd state =
+(* THE MAIN FUNCTION FOR GAMEPLAY. *)
+let rec play_game brd st =
   (* Print current board *)
   let () = print_endline "Current board:" in
   let () = print_board brd in
@@ -78,7 +77,7 @@ let rec play_game brd state =
 
   (* Get the location of the piece player wants to move. If location has
      no piece, keep asking until player inputs location with piece. *)
-  let select_pce_loc = get_select_pce_loc state in
+  let select_pce_loc = get_select_pce_loc st in
 
   (* Prompt for destination location. *)
   let () =
@@ -87,26 +86,27 @@ let rec play_game brd state =
        (row,column). Upper left is (0,0) and bottom right is (7,7). NO \
        SPACES!"
   in
+
   (* Get the destination location - ask player for dest location; check
      to see if the selected piece can be legally moved from starting to
      dest location; if not, keep asking for a dest location until a
      valid dest location for the selected piece is inputted.*)
-  let dest = get_dest state select_pce_loc in
+  let dest = get_dest st select_pce_loc in
 
   (* Move the piece the player selected to position dest. *)
   let brd = move_piece brd select_pce_loc dest in
 
   (* Get the moved piece and mark it as having moved at least once. *)
-  let moved_piece = what_piece state select_pce_loc |> first_move in
+  let moved_piece = what_piece st select_pce_loc |> first_move in
 
   (* Update the state so it reflects the updated board. There needs to
      be 2 function calls to fully update state after a move. The first
      call to update_loc connects the dest location to moved_piece in the
      assoc list. The second call to update_loc puts a None piece on the
      original spot of moved_piece. *)
-  let state = update_loc state dest moved_piece in
-  let state =
-    update_loc state select_pce_loc (to_piece select_pce_loc "[ ]")
+  let st = update_loc st dest moved_piece in
+  let st =
+    update_loc st select_pce_loc (to_piece select_pce_loc "[ ]")
   in
 
   (* Tell player that move is complete and print the updated board. *)
@@ -117,11 +117,11 @@ let rec play_game brd state =
      CHECKMATE, THEN THE GAME WOULD STOP AND A WINNER WOULD BE PRINTED
      OUT AT THIS POINT. *)
 
-  (* "Flip" board orientation so reading it is easy for opposing player.
+  (* "Flip" board orientation so opposing player can read board easily.
      Print this board out. In addition, the state must be "flipped" to
      accurately reflect what piece is on which board location.*)
   let brd = flip brd in
-  let state = flip_state state in
+  let st = flip_state st in
   let () = print_endline "" in
   let () = print_endline "Next player - board flipped: " in
   let () = print_board brd in
@@ -135,7 +135,7 @@ let rec play_game brd state =
   if keep_play = "y" then
     (*If players want to continue, call play_game with the current board
       and state.*)
-    play_game brd state
+    play_game brd st
     (*If players want to stop, print a end of game message and allow
       play_game to terminate. *)
   else print_endline "Goodbye!"
@@ -146,8 +146,8 @@ let main () =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "\n\nWelcome to Extremely Simple Chess.\n";
   let board = init_board () in
-  let state = init_state board in
-  play_game board state
+  let st = init_state board in
+  play_game board st
 
 (* Starts game. *)
 let () = main ()

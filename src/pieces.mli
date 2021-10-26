@@ -6,9 +6,9 @@
 exception Illegal of string
 
 type piece
+(** The abstract type of values representing game pieces. *)
 
 val no_piece : piece -> bool
-(** The abstract type of values representing game pieces. *)
 
 val to_piece : int * int -> string -> piece
 (** [to_piece s] is the conversion of a piece on the matrix to a piece
