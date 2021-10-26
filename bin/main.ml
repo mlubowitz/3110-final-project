@@ -16,12 +16,12 @@ let str_to_grid str =
 
 (* ======================================================= *)
 
-(* [get_dest brd state sel_pce_loc] is the destination location that the
-   user wants to move their selected piece to. This function calls
-   is_legal and is_path_empty to determine if the selected piece is able
-   to move to the dest location the player inputs. If illegal move,
-   player is prompted for a different dest location, and this repeats
-   until valid dest is inputted.*)
+(* [get_dest brd state sel_pce_loc] is the valid destination location
+   that the user wants to move their selected piece to. This function
+   calls is_legal and is_path_empty to determine if the selected piece
+   is able to move to the dest location the player inputs. If illegal
+   move, player is prompted for a different dest location, and this
+   repeats until valid dest is inputted.*)
 let rec get_dest state sel_pce_loc =
   let dest = read_line () |> str_to_grid in
   let select_piece = what_piece state sel_pce_loc in
