@@ -125,3 +125,13 @@ let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
     horizontal_path_empty st loc1 loc2
   else if diagonal_move loc1 loc2 then diagonal_path_empty st loc1 loc2
   else true
+
+(* ==================flip_state======================================== *)
+(*[flip_loc] changes the location of the piece to reflect flipped
+  location *)
+let flip_loc = function
+  | (r, c), p -> ((7 - r, 7 - c), p)
+
+let flip_state st = List.map flip_loc st
+
+(* The problem is that is_legal uses the piece locations fields *)

@@ -22,3 +22,7 @@ val update_loc : t -> int * int -> Pieces.piece -> t
 val is_path_empty : t -> int * int -> int * int -> bool
 (**[is_path_empty st l1 l2] is true if path from location [l1] to [l2]
    on the chess board has no pieces, false otherwise. *)
+
+val flip_state : t -> t
+(**[flip_state st] is st but with the locations of pieces updated so
+   that the state reflects the flipped board. *)
