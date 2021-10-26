@@ -17,7 +17,8 @@ val what_piece : t -> int * int -> Pieces.piece
 
 val update_loc : t -> int * int -> Pieces.piece -> t
 (** [update_loc st l p] is state [st] updated so that the piece at
-    location [l] is [p]. *)
+    location [l] is piece [p]. If there is a piece that was already at
+    location [l], that piece is replaced by the new piece.*)
 
 val is_path_empty : t -> int * int -> int * int -> bool
 (**[is_path_empty st l1 l2] is true if path from location [l1] to [l2]

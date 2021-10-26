@@ -18,16 +18,17 @@ let rec can_move brd state input =
   let dest = read_line () |> str_to_grid in
   let f_piece = what_piece state input in
   let dest_piece = what_piece state dest in
-  (* let () = print_endline dest_piece.position in *)
+
   match
+    (*check if path blocked or move not legal*)
     is_legal f_piece dest_piece && is_path_empty state input dest
   with
   | true -> dest
   | false ->
       let () =
         print_endline
-          "Cannot move to that location. Input a new destination \
-           location."
+          "Your selected piece cannot move to that location. Input a \
+           new destination location."
       in
       can_move brd state input
 
@@ -42,7 +43,7 @@ let rec get_input state =
   | true ->
       let () =
         print_endline
-          "Not valid piece. Input location of piece you want to select."
+          "Not a piece. Input location of piece you want to select."
       in
       get_input state
 
@@ -70,11 +71,16 @@ let rec play_game brd state =
        is (7,7). NO SPACES!"
   in
   (* get a destination location - check to see if move can be made from
-     starting to destination loation; if not, keep asking until valid
+     starting to destination location; if not, keep asking until valid
      location is added *)
   let dest = can_move brd state input in
   (* move piece and update board *)
   let brd = move_piece brd input dest in
+  (* mark the piece as having moved at least once *)
+  let moved_piece = what_piece state input |> first_move in
+  (* the state must be updated so state reflects current board *)
+  let state = update_loc state dest moved_piece in
+  let state = update_loc state input (to_piece input "[ ]") in
   let () = print_endline "Move complete:" in
   let () = print_board brd in
   let brd = flip brd in
@@ -100,5 +106,3 @@ let main () =
   play_game board state
 
 let () = main ()
-
-(*note to self - state when board flips - need to consider! *)

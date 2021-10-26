@@ -130,8 +130,8 @@ let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
 (*[flip_loc] changes the location of the piece to reflect flipped
   location *)
 let flip_loc = function
-  | (r, c), p -> ((7 - r, 7 - c), p)
+  | (r, c), p ->
+      let new_l = (7 - r, 7 - c) in
+      (new_l, new_loc_piece p new_l)
 
 let flip_state st = List.map flip_loc st
-
-(* The problem is that is_legal uses the piece locations fields *)
