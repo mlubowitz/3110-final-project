@@ -153,3 +153,12 @@ let main () =
 let () = main ()
 
 (*CODE ABOVE DOES NOT HANDLE WINNING THE GAME. *)
+
+let check_castle state (p : piece) (p2 : piece) =
+  if is_king p && abs (snd (get_position p) - snd (get_position p2)) > 1
+  then
+    let p3 = castle_side state p2 in
+    if is_path_empty state (get_position p) (get_position p3) then
+      can_castle p p3
+    else false
+  else false
