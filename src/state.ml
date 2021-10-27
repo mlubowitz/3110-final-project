@@ -139,16 +139,3 @@ let flip_state st = List.map flip_loc st
 let castle_side (st : t) (p2 : piece) =
   if get_position p2 = (7, 6) then what_piece st (7, 7)
   else what_piece st (7, 0)
-
-let call_is_legal (st : t) (p : piece) (p2 : piece) =
-  if is_path_empty st (get_position p) (get_position p2) then
-    if
-      is_king p
-      && abs (snd (get_position p) - snd (get_position p2)) > 1
-    then
-      let p3 = castle_side st p2 in
-      if is_path_empty st (get_position p) (get_position p3) then
-        can_castle p p3
-      else false
-    else is_legal p p2
-  else false

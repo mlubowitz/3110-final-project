@@ -27,3 +27,5 @@ val is_path_empty : t -> int * int -> int * int -> bool
 val flip_state : t -> t
 (**[flip_state st] is st but with the locations of pieces updated so
    that the state reflects the flipped board. *)
+
+val castle_side : t -> Pieces.piece -> Pieces.piece
