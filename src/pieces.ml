@@ -21,11 +21,17 @@ type piece = {
   no_first_move : bool;
 }
 
+let get_position p = p.position
+
+let is_king p = p.piece_type = King
+
+let get_no_first_move p = p.no_first_move
+
 let get_color p = p.color
 
 exception Illegal of string
 
-let no_piece (p : piece) = p.piece_type = None
+let is_piece (p : piece) = p.piece_type != None
 
 let to_piece (ori_loc : int * int) (n : string) : piece =
   match n with
@@ -166,6 +172,11 @@ let is_legal (p : piece) (p2 : piece) =
     | Queen -> queen_is_legal p.position p2.position
     | King -> king_is_legal p.position p2.position
     | None -> raise (Illegal "The original location has no piece.")
+
+let can_castle (p1 : piece) (p3 : piece) =
+  if p3.piece_type = Rook && p1.no_first_move && p3.no_first_move then
+    true
+  else false
 
 let first_move (p : piece) = { p with no_first_move = false }
 
