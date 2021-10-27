@@ -30,3 +30,5 @@ val first_move : piece -> piece
 val new_loc_piece : piece -> int * int -> piece
 (** [new_loc_piece p new_loc] is the same piece as [p] but with position
     set to [new_loc].*)
+
+val can_castle : piece -> piece -> bool

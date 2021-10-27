@@ -48,9 +48,9 @@ let rec get_dest state sel_pce_loc =
 let rec get_select_pce_loc state =
   let input = read_line () |> str_to_grid in
   let piece = what_piece state input in
-  match no_piece piece with
-  | false -> input
-  | true ->
+  match is_piece piece with
+  | true -> input
+  | false ->
       let () =
         print_endline
           "Not a piece. Input location of piece you want to select."

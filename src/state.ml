@@ -68,13 +68,13 @@ let rec verticle_path_empty
     (loc1 : int * int)
     (loc2 : int * int) =
   if fst loc1 > fst loc2 + 1 then
-    match no_piece (what_piece st (fst loc1 - 1, snd loc1)) with
-    | true -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
+    | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
+    | true -> false
   else if fst loc2 > fst loc1 + 1 then
-    match no_piece (what_piece st (fst loc2 - 1, snd loc2)) with
-    | true -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
-    | false -> false
+    match is_piece (what_piece st (fst loc2 - 1, snd loc2)) with
+    | false -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
+    | true -> false
   else true
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
@@ -85,13 +85,13 @@ let rec horizontal_path_empty
     (loc1 : int * int)
     (loc2 : int * int) =
   if snd loc1 < snd loc2 - 1 then
-    match no_piece (what_piece st (fst loc1, snd loc1 + 1)) with
-    | true -> horizontal_path_empty st (fst loc1, snd loc1 + 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1, snd loc1 + 1)) with
+    | false -> horizontal_path_empty st (fst loc1, snd loc1 + 1) loc2
+    | true -> false
   else if snd loc1 > snd loc2 + 1 then
-    match no_piece (what_piece st (fst loc1, snd loc1 - 1)) with
-    | true -> horizontal_path_empty st (fst loc1, snd loc1 - 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1, snd loc1 - 1)) with
+    | false -> horizontal_path_empty st (fst loc1, snd loc1 - 1) loc2
+    | true -> false
   else true
 
 (* [diagonal_path_empty st loc1 loc2] is true if path from [loc1] to
@@ -102,21 +102,21 @@ let rec diagonal_path_empty
     (loc1 : int * int)
     (loc2 : int * int) =
   if fst loc1 < fst loc2 - 1 && snd loc1 < snd loc2 - 1 then
-    match no_piece (what_piece st (fst loc1 + 1, snd loc1 + 1)) with
-    | true -> diagonal_path_empty st (fst loc1 + 1, snd loc1 + 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1 + 1, snd loc1 + 1)) with
+    | false -> diagonal_path_empty st (fst loc1 + 1, snd loc1 + 1) loc2
+    | true -> false
   else if fst loc1 < fst loc2 - 1 && snd loc1 > snd loc2 + 1 then
-    match no_piece (what_piece st (fst loc1 + 1, snd loc1 - 1)) with
-    | true -> diagonal_path_empty st (fst loc1 + 1, snd loc1 - 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1 + 1, snd loc1 - 1)) with
+    | false -> diagonal_path_empty st (fst loc1 + 1, snd loc1 - 1) loc2
+    | true -> false
   else if fst loc1 > fst loc2 + 1 && snd loc1 > snd loc2 + 1 then
-    match no_piece (what_piece st (fst loc1 - 1, snd loc1 - 1)) with
-    | true -> diagonal_path_empty st (fst loc1 - 1, snd loc1 - 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1 - 1, snd loc1 - 1)) with
+    | false -> diagonal_path_empty st (fst loc1 - 1, snd loc1 - 1) loc2
+    | true -> false
   else if fst loc1 > fst loc2 + 1 && snd loc1 < snd loc2 - 1 then
-    match no_piece (what_piece st (fst loc1 - 1, snd loc1 + 1)) with
-    | true -> diagonal_path_empty st (fst loc1 - 1, snd loc1 + 1) loc2
-    | false -> false
+    match is_piece (what_piece st (fst loc1 - 1, snd loc1 + 1)) with
+    | false -> diagonal_path_empty st (fst loc1 - 1, snd loc1 + 1) loc2
+    | true -> false
   else true
 
 let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
@@ -135,3 +135,20 @@ let flip_loc = function
       (new_l, new_loc_piece p new_l)
 
 let flip_state st = List.map flip_loc st
+
+let castle_side (st : t) (p2 : piece) =
+  if get_position p2 = (7, 6) then what_piece st (7, 7)
+  else what_piece st (7, 0)
+
+let call_is_legal (st : t) (p : piece) (p2 : piece) =
+  if is_path_empty st (get_position p) (get_position p2) then
+    if
+      is_king p
+      && abs (snd (get_position p) - snd (get_position p2)) > 1
+    then
+      let p3 = castle_side st p2 in
+      if is_path_empty st (get_position p) (get_position p3) then
+        can_castle p p3
+      else false
+    else is_legal p p2
+  else false
