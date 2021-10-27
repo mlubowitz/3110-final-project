@@ -8,7 +8,11 @@ exception Illegal of string
 type piece
 (** The abstract type of values representing game pieces. *)
 
-val no_piece : piece -> bool
+val get_position : piece -> int * int
+
+val is_king : piece -> bool
+
+val is_piece : piece -> bool
 
 val to_piece : int * int -> string -> piece
 (** [to_piece s] is the conversion of a piece on the matrix to a piece
