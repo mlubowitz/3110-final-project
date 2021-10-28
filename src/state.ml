@@ -70,12 +70,12 @@ let rec verticle_path_empty
   if fst loc1 > fst loc2 + 1 then
     match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
     | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
-    | true -> false
+    | true -> what_piece st (fst loc1 - 1, snd loc1)
   else if fst loc2 > fst loc1 + 1 then
     match is_piece (what_piece st (fst loc2 - 1, snd loc2)) with
     | false -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
-    | true -> false
-  else true
+    | true -> what_piece st (fst loc2 - 1, snd loc2)
+  else what_piece st loc1
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
    [loc2] has no pieces. Otherwise false. This is a hlper to
@@ -87,12 +87,12 @@ let rec horizontal_path_empty
   if snd loc1 < snd loc2 - 1 then
     match is_piece (what_piece st (fst loc1, snd loc1 + 1)) with
     | false -> horizontal_path_empty st (fst loc1, snd loc1 + 1) loc2
-    | true -> false
+    | true -> what_piece st (fst loc1, snd loc1 + 1)
   else if snd loc1 > snd loc2 + 1 then
     match is_piece (what_piece st (fst loc1, snd loc1 - 1)) with
     | false -> horizontal_path_empty st (fst loc1, snd loc1 - 1) loc2
-    | true -> false
-  else true
+    | true -> what_piece st (fst loc1, snd loc1 - 1)
+  else what_piece st loc1
 
 (* [diagonal_path_empty st loc1 loc2] is true if path from [loc1] to
    [loc2] has no pieces. Otherwise false. This is a hlper to
@@ -104,27 +104,31 @@ let rec diagonal_path_empty
   if fst loc1 < fst loc2 - 1 && snd loc1 < snd loc2 - 1 then
     match is_piece (what_piece st (fst loc1 + 1, snd loc1 + 1)) with
     | false -> diagonal_path_empty st (fst loc1 + 1, snd loc1 + 1) loc2
-    | true -> false
+    | true -> what_piece st (fst loc1 + 1, snd loc1 + 1)
   else if fst loc1 < fst loc2 - 1 && snd loc1 > snd loc2 + 1 then
     match is_piece (what_piece st (fst loc1 + 1, snd loc1 - 1)) with
     | false -> diagonal_path_empty st (fst loc1 + 1, snd loc1 - 1) loc2
-    | true -> false
+    | true -> what_piece st (fst loc1 + 1, snd loc1 - 1)
   else if fst loc1 > fst loc2 + 1 && snd loc1 > snd loc2 + 1 then
     match is_piece (what_piece st (fst loc1 - 1, snd loc1 - 1)) with
     | false -> diagonal_path_empty st (fst loc1 - 1, snd loc1 - 1) loc2
-    | true -> false
+    | true -> what_piece st (fst loc1 - 1, snd loc1 - 1)
   else if fst loc1 > fst loc2 + 1 && snd loc1 < snd loc2 - 1 then
     match is_piece (what_piece st (fst loc1 - 1, snd loc1 + 1)) with
     | false -> diagonal_path_empty st (fst loc1 - 1, snd loc1 + 1) loc2
-    | true -> false
-  else true
+    | true -> what_piece st (fst loc1 - 1, snd loc1 + 1)
+  else what_piece st loc1
 
-let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
+let piece_in_path (st : t) (loc1 : int * int) (loc2 : int * int) =
   if verticle_move loc1 loc2 then verticle_path_empty st loc1 loc2
   else if horizontal_move loc1 loc2 then
     horizontal_path_empty st loc1 loc2
   else if diagonal_move loc1 loc2 then diagonal_path_empty st loc1 loc2
-  else true
+  else what_piece st loc1
+
+let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
+  if get_position (piece_in_path st loc1 loc2) = loc1 then true
+  else false
 
 (* ==================flip_state======================================== *)
 (*[flip_loc] changes the location of the piece to reflect flipped
@@ -136,17 +140,27 @@ let flip_loc = function
 
 let flip_state st = List.map flip_loc st
 
+(* ==================castle_side======================================== *)
+(*[castle_side] returns the piece on the side that king wantst to castle
+  where the rook would be at the start of the game *)
 let castle_side (st : t) (p2 : piece) =
   if get_position p2 = (7, 6) then what_piece st (7, 7)
   else what_piece st (7, 0)
 
-let diagonal_check_helper (st : t) a b =
+(* ==================in_check======================================== *)
+(*[in_check] determines if a player is in check *)
+
+let diagonal_check_helper (st : t) (p : piece) =
+  let a, b = get_position p in
   if a + b <= 7 then
-    is_path_empty st (a, b) (0, a + b) (*top right diagonal*)
-    && is_path_empty st (a, b) (a + b, 0) (*bottom left diagonal*)
+    diag_check_piece (piece_in_path st (a, b) (0, a + b)) p
+    (*top right diagonal*)
+    && diag_check_piece (piece_in_path st (a, b) (a + b, 0)) p
+    (*bottom left diagonal*)
   else
-    is_path_empty st (a, b) (a - b, 7) (*top right diagonal*)
-    && is_path_empty st (a, b) (4, a + b - 7)
+    diag_check_piece (piece_in_path st (a, b) (a - b, 7)) p
+    (*top right diagonal*)
+    && diag_check_piece (piece_in_path st (a, b) (4, a + b - 7)) p
 
 (*bottom left diagonal*)
 let in_check_diagonals (st : t) (p : piece) =
@@ -154,16 +168,22 @@ let in_check_diagonals (st : t) (p : piece) =
   (*row > column to check diagonals for top left and bottom right*)
   if a >= b then
     if
-      is_path_empty st (a, b) (a - b, 0) (*top left diagonal*)
-      && is_path_empty st (a, b) (7, 7 - (a - b))
+      diag_check_piece (piece_in_path st (a, b) (a - b, 0)) p
+      (*top left diagonal*)
+      && diag_check_piece (piece_in_path st (a, b) (7, 7 - (a - b))) p
       (*bottom right diagonal*)
-    then diagonal_check_helper st a b
+    then diagonal_check_helper st p
     else false
   else if a < b then
     if
-      is_path_empty st (a, b) (0, b - a) (*top left diagonal*)
-      && is_path_empty st (a, b) (7 - (b - a), 7)
+      diag_check_piece (piece_in_path st (a, b) (0, b - a)) p
+      (*top left diagonal*)
+      && diag_check_piece (piece_in_path st (a, b) (7 - (b - a), 7)) p
       (*bottom right diagonal*)
-    then diagonal_check_helper st a b
+    then diagonal_check_helper st p
     else false
   else false
+
+let in_check_orthog_adj (st : t) (p : piece) = failwith "Unimplemented"
+
+let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
