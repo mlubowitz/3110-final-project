@@ -32,3 +32,5 @@ val new_loc_piece : piece -> int * int -> piece
     set to [new_loc].*)
 
 val can_castle : piece -> piece -> bool
+
+val diag_check_piece : piece -> piece -> bool
