@@ -139,3 +139,31 @@ let flip_state st = List.map flip_loc st
 let castle_side (st : t) (p2 : piece) =
   if get_position p2 = (7, 6) then what_piece st (7, 7)
   else what_piece st (7, 0)
+
+let diagonal_check_helper (st : t) a b =
+  if a + b <= 7 then
+    is_path_empty st (a, b) (0, a + b) (*top right diagonal*)
+    && is_path_empty st (a, b) (a + b, 0) (*bottom left diagonal*)
+  else
+    is_path_empty st (a, b) (a - b, 7) (*top right diagonal*)
+    && is_path_empty st (a, b) (4, a + b - 7)
+
+(*bottom left diagonal*)
+let in_check_diagonals (st : t) (p : piece) =
+  let a, b = get_position p in
+  (*row > column to check diagonals for top left and bottom right*)
+  if a >= b then
+    if
+      is_path_empty st (a, b) (a - b, 0) (*top left diagonal*)
+      && is_path_empty st (a, b) (7, 7 - (a - b))
+      (*bottom right diagonal*)
+    then diagonal_check_helper st a b
+    else false
+  else if a < b then
+    if
+      is_path_empty st (a, b) (0, b - a) (*top left diagonal*)
+      && is_path_empty st (a, b) (7 - (b - a), 7)
+      (*bottom right diagonal*)
+    then diagonal_check_helper st a b
+    else false
+  else false
