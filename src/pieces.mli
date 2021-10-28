@@ -34,3 +34,5 @@ val new_loc_piece : piece -> int * int -> piece
 val can_castle : piece -> piece -> bool
 
 val diag_check_piece : piece -> piece -> bool
+
+val orthog_adj_check_piece : piece -> piece -> bool
