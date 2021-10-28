@@ -153,14 +153,14 @@ let castle_side (st : t) (p2 : piece) =
 let diagonal_check_helper (st : t) (p : piece) =
   let a, b = get_position p in
   if a + b <= 7 then
-    diag_check_piece (piece_in_path st (a, b) (0, a + b)) p
+    diag_check_piece (piece_in_path st (a, b) (-1, a + b)) p
     (*top right diagonal*)
-    && diag_check_piece (piece_in_path st (a, b) (a + b, 0)) p
+    && diag_check_piece (piece_in_path st (a, b) (a + b, -1)) p
     (*bottom left diagonal*)
   else
-    diag_check_piece (piece_in_path st (a, b) (a - b, 7)) p
+    diag_check_piece (piece_in_path st (a, b) (a - b, 8)) p
     (*top right diagonal*)
-    && diag_check_piece (piece_in_path st (a, b) (4, a + b - 7)) p
+    && diag_check_piece (piece_in_path st (a, b) (8, a + b - 8)) p
 
 (*bottom left diagonal*)
 let in_check_diagonals (st : t) (p : piece) =
@@ -168,22 +168,29 @@ let in_check_diagonals (st : t) (p : piece) =
   (*row > column to check diagonals for top left and bottom right*)
   if a >= b then
     if
-      diag_check_piece (piece_in_path st (a, b) (a - b, 0)) p
+      diag_check_piece (piece_in_path st (a, b) (a - b, -1)) p
       (*top left diagonal*)
-      && diag_check_piece (piece_in_path st (a, b) (7, 7 - (a - b))) p
+      && diag_check_piece (piece_in_path st (a, b) (8, 8 - (a - b))) p
       (*bottom right diagonal*)
     then diagonal_check_helper st p
     else false
   else if a < b then
     if
-      diag_check_piece (piece_in_path st (a, b) (0, b - a)) p
+      diag_check_piece (piece_in_path st (a, b) (-1, b - a)) p
       (*top left diagonal*)
-      && diag_check_piece (piece_in_path st (a, b) (7 - (b - a), 7)) p
+      && diag_check_piece (piece_in_path st (a, b) (8 - (b - a), 8)) p
       (*bottom right diagonal*)
     then diagonal_check_helper st p
     else false
   else false
 
-let in_check_orthog_adj (st : t) (p : piece) = failwith "Unimplemented"
+let in_check_orthog_adj (st : t) (p : piece) =
+  let a, b = get_position p in
+  if a > 0 && b > 0 && a < 7 && b < 7 then
+    orthog_adj_check_piece (piece_in_path st (a, b) (a, -1)) p
+    && orthog_adj_check_piece (piece_in_path st (a, b) (a, 8)) p
+    && orthog_adj_check_piece (piece_in_path st (a, b) (-1, b)) p
+    && orthog_adj_check_piece (piece_in_path st (a, b) (8, b)) p
+  else false
 
 let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
