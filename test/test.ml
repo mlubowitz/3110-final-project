@@ -54,6 +54,9 @@ let is_path_empty_test name state ori_loc new_loc expected =
     (is_path_empty state ori_loc new_loc)
     ~printer:string_of_bool
 
+let find_king_test name state color expected =
+  name >:: fun _ -> assert_equal expected (find_king state color)
+
 (* Get the state of the board we created above (board with pieces in
    initial layout) *)
 let test_st = init_state test_board
@@ -92,6 +95,10 @@ let state_tests =
       (5, 2) false;
     is_path_empty_test "dia-piece in btwn-going SE" test_st (0, 2)
       (3, 5) false;
+    find_king_test "loc of black king in init board should be (0,4)"
+      test_st "B" (0, 4);
+    find_king_test "loc of white king in init board should be (7,4)"
+      test_st "W" (7, 4);
   ]
 
 let tests =

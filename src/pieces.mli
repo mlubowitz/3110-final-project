@@ -36,3 +36,7 @@ val can_castle : piece -> piece -> bool
 val diag_check_piece : piece -> piece -> bool
 
 val orthog_adj_check_piece : piece -> piece -> bool
+
+val get_color : piece -> string
+(** [get_color p] is either "W", "B", or "N" (no color) depending on the
+    color of piece [p] . *)

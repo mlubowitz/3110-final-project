@@ -194,3 +194,10 @@ let in_check_orthog_adj (st : t) (p : piece) =
   else false
 
 let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
+
+(* ==================find_king======================================== *)
+let rec find_king t color =
+  match t with
+  | [] -> failwith "King should be in board."
+  | (l, p) :: t ->
+      if is_king p && color = get_color p then l else find_king t color

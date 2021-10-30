@@ -29,3 +29,7 @@ val flip_state : t -> t
    that the state reflects the flipped board. *)
 
 val castle_side : t -> Pieces.piece -> Pieces.piece
+
+val find_king : t -> string -> int * int
+(* [fing_king st c] is the location of the king with color [c] in state
+   [st]. *)

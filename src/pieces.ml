@@ -27,7 +27,11 @@ let is_king p = p.piece_type = King
 
 let get_no_first_move p = p.no_first_move
 
-let get_color p = p.color
+let get_color p =
+  match p.color with
+  | White -> "W"
+  | Black -> "B"
+  | None -> "N"
 
 exception Illegal of string
 
