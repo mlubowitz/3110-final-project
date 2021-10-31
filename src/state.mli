@@ -29,6 +29,11 @@ val flip_state : t -> t
    that the state reflects the flipped board. *)
 
 val castle_side : t -> Pieces.piece -> Pieces.piece
+(**[is_path_empty st p2] returns the piece on the side that king wantst
+   to castle where the rook would be at the start of the game *)
+
+val in_check : t -> Pieces.piece -> bool
+(**[in_check st p] returns [true] if the king is in check *)
 
 val find_king : t -> string -> int * int
 (* [fing_king st c] is the location of the king with color [c] in state
