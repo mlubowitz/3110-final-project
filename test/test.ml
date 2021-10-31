@@ -57,9 +57,23 @@ let is_path_empty_test name state ori_loc new_loc expected =
 let find_king_test name state color expected =
   name >:: fun _ -> assert_equal expected (find_king state color)
 
+let in_check_test name state piece expected =
+  name >:: fun _ ->
+  assert_equal expected (in_check state piece) ~printer:string_of_bool
+
 (* Get the state of the board we created above (board with pieces in
    initial layout) *)
 let test_st = init_state test_board
+
+let a = move_piece test_board (6, 2) (5, 2)
+
+let b = move_piece a (6, 4) (5, 4)
+
+let in_check_board = move_piece b (7, 3) (4, 0)
+
+let in_check_test_st = init_state in_check_board
+
+let checked_king = what_piece in_check_test_st (7, 3)
 
 let state_tests =
   [
@@ -101,8 +115,15 @@ let state_tests =
       test_st "W" (7, 4);
   ]
 
+let in_check_tests =
+  [
+    in_check_test "diagonal check from queen" in_check_test_st
+      checked_king true;
+  ]
+
 let tests =
   "test suite for Chess"
-  >::: List.flatten [ pieces_tests; board_tests; state_tests ]
+  >::: List.flatten
+         [ pieces_tests; board_tests; state_tests; in_check_tests ]
 
 let _ = run_test_tt_main tests
