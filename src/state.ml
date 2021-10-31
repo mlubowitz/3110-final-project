@@ -75,7 +75,7 @@ let rec verticle_path_empty
     match is_piece (what_piece st (fst loc2 - 1, snd loc2)) with
     | false -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
     | true -> what_piece st (fst loc2 - 1, snd loc2)
-  else what_piece st loc1
+  else what_piece st loc2
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
    [loc2] has no pieces. Otherwise false. This is a hlper to
@@ -92,7 +92,7 @@ let rec horizontal_path_empty
     match is_piece (what_piece st (fst loc1, snd loc1 - 1)) with
     | false -> horizontal_path_empty st (fst loc1, snd loc1 - 1) loc2
     | true -> what_piece st (fst loc1, snd loc1 - 1)
-  else what_piece st loc1
+  else what_piece st loc2
 
 (* [diagonal_path_empty st loc1 loc2] is true if path from [loc1] to
    [loc2] has no pieces. Otherwise false. This is a hlper to
@@ -117,17 +117,17 @@ let rec diagonal_path_empty
     match is_piece (what_piece st (fst loc1 - 1, snd loc1 + 1)) with
     | false -> diagonal_path_empty st (fst loc1 - 1, snd loc1 + 1) loc2
     | true -> what_piece st (fst loc1 - 1, snd loc1 + 1)
-  else what_piece st loc1
+  else what_piece st loc2
 
 let piece_in_path (st : t) (loc1 : int * int) (loc2 : int * int) =
   if verticle_move loc1 loc2 then verticle_path_empty st loc1 loc2
   else if horizontal_move loc1 loc2 then
     horizontal_path_empty st loc1 loc2
   else if diagonal_move loc1 loc2 then diagonal_path_empty st loc1 loc2
-  else what_piece st loc1
+  else what_piece st loc2
 
 let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
-  if get_position (piece_in_path st loc1 loc2) = loc1 then true
+  if get_position (piece_in_path st loc1 loc2) = loc2 then true
   else false
 
 (* ==================flip_state======================================== *)
@@ -194,3 +194,15 @@ let in_check_orthog_adj (st : t) (p : piece) =
   else false
 
 let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
+
+let in_check (st : t) (p : piece) =
+  if in_check_diagonals st p = false && in_check_orthog_adj st p = false
+  then false
+  else true
+
+(* ==================find_king======================================== *)
+let rec find_king t color =
+  match t with
+  | [] -> failwith "King should be in board."
+  | (l, p) :: t ->
+      if is_king p && color = get_color p then l else find_king t color
