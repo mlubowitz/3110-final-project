@@ -245,6 +245,12 @@ let in_check_tests =
 let tests =
   "test suite for Chess"
   >::: List.flatten
-         [ is_legal_tests; pieces_tests; board_tests; state_tests ]
+         [
+           is_legal_tests;
+           pieces_tests;
+           board_tests;
+           state_tests;
+           in_check_tests;
+         ]
 
 let _ = run_test_tt_main tests
