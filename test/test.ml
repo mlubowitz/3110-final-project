@@ -136,8 +136,13 @@ let pieces_tests = []
 let get_str_piece_test name board grid expected =
   name >:: fun _ -> assert_equal expected (get_str_piece board grid)
 
+let rec lst_to_str = function
+  | [] -> ""
+  | h :: t -> h ^ lst_to_str t
+
 let get_row_test name board row_num expected =
-  name >:: fun _ -> assert_equal expected (get_row board row_num)
+  name >:: fun _ ->
+  assert_equal expected (get_row board row_num) ~printer:lst_to_str
 
 (*A test board. It is the initial chess board with nothing moved yet. *)
 let test_board = init_board ()
@@ -186,7 +191,7 @@ let in_check_test name state piece expected =
    initial layout) *)
 let test_st = init_state test_board
 
-let a = move_piece test_board (6, 2) (5, 2)
+let a = move_piece (init_board ()) (6, 2) (5, 2)
 
 let b = move_piece a (6, 4) (5, 4)
 
