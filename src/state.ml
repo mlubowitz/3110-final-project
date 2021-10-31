@@ -71,10 +71,10 @@ let rec verticle_path_empty
     match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
     | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
     | true -> what_piece st (fst loc1 - 1, snd loc1)
-  else if fst loc2 > fst loc1 + 1 then
-    match is_piece (what_piece st (fst loc2 - 1, snd loc2)) with
-    | false -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
-    | true -> what_piece st (fst loc2 - 1, snd loc2)
+  else if fst loc1 < fst loc2 - 1 then
+    match is_piece (what_piece st (fst loc1 + 1, snd loc1)) with
+    | false -> verticle_path_empty st (fst loc1 + 1, snd loc1) loc1
+    | true -> what_piece st (fst loc1 + 1, snd loc1)
   else what_piece st loc2
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
@@ -127,8 +127,7 @@ let piece_in_path (st : t) (loc1 : int * int) (loc2 : int * int) =
   else what_piece st loc2
 
 let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
-  if get_position (piece_in_path st loc1 loc2) = loc2 then true
-  else false
+  get_position (piece_in_path st loc1 loc2) = loc2
 
 (* ==================flip_state======================================== *)
 (*[flip_loc] changes the location of the piece to reflect flipped
@@ -193,7 +192,8 @@ let in_check_orthog_adj (st : t) (p : piece) =
     && orthog_adj_check_piece (piece_in_path st (a, b) (8, b)) p
   else false
 
-let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
+(* let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
+   let a, b = get_position p in *)
 
 let in_check (st : t) (p : piece) =
   if in_check_diagonals st p = false && in_check_orthog_adj st p = false

@@ -200,4 +200,4 @@ let orthog_adj_check_piece (p : piece) (p2 : piece) =
   else false
 
 let knight_check_piece (p : piece) (p2 : piece) =
-  failwith "Unimplemented"
+  if p.color != p2.color && p2.piece_type = Knight then true else false
