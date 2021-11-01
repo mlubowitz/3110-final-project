@@ -38,10 +38,10 @@ val can_castle : piece -> piece -> bool
 (** [can_castle p1 p3] returns [true] if [p3] is a rook and neither [p1]
     nor [p3] has moved, and [false] otherwise*)
 
-val diag_check_piece : piece -> piece -> bool
+val diag_check_piece : piece -> piece -> piece -> bool
 (** [diag_check_piece p p2] determines if [p2] is checking [p]*)
 
-val orthog_adj_check_piece : piece -> piece -> bool
+val orthog_adj_check_piece : piece -> piece -> piece -> bool
 (** [diag_check_piece p p2] determines if [p2] is checking [p]*)
 
 val knight_check_piece : piece -> piece -> bool
