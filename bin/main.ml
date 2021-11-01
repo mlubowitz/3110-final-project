@@ -240,7 +240,7 @@ let () = main ()
 
 (*CODE ABOVE DOES NOT HANDLE WINNING THE GAME. *)
 
-let check_castle state (p : piece) (p2 : piece) =
+let is_castle state (p : piece) (p2 : piece) =
   if
     is_king p
     && abs (snd (get_position p) - snd (get_position p2)) > 1
