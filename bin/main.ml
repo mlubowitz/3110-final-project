@@ -19,7 +19,26 @@ let str_to_grid str =
 let grid_to_str grid =
   "(" ^ string_of_int (fst grid) ^ "," ^ string_of_int (snd grid) ^ ")"
 
-(* ======================================================= *)
+(* [keep_playing] is y or no depending on if player wants to play. If
+   player doesn't input y or n, this function keeps asking for y or
+   n. *)
+let rec keep_playing () =
+  let input = read_line () in
+  match input with
+  | "y"
+  | "Y"
+  | "yes"
+  | "Yes" ->
+      "y"
+  | "n"
+  | "N"
+  | "no"
+  | "No" ->
+      "n"
+  | x ->
+      let () = print_endline "Please type y or n" in
+      keep_playing ()
+(* Not using below right now. *)
 
 (* [get_dest brd state sel_pce_loc] is the valid destination location
    that the user wants to move their selected piece to. This function
@@ -27,30 +46,22 @@ let grid_to_str grid =
    is able to move to the dest location the player inputs. If illegal
    move, player is prompted for a different dest location, and this
    repeats until valid dest is inputted.*)
-let rec get_dest state sel_pce_loc =
-  let dest = read_line () |> str_to_grid in
-  let select_piece = what_piece state sel_pce_loc in
-  let pce_on_dest = what_piece state dest in
+(* let rec get_dest state sel_pce_loc = let dest = read_line () |>
+   str_to_grid in let select_piece = what_piece state sel_pce_loc in let
+   pce_on_dest = what_piece state dest in
 
-  match
-    is_legal select_piece pce_on_dest
-    && is_path_empty state sel_pce_loc dest
-  with
-  | true -> dest
-  | false ->
-      let () =
-        print_endline
-          "Your selected piece cannot move to that location. Input a \
-           new destination location."
-      in
-      get_dest state sel_pce_loc
+   match is_legal select_piece pce_on_dest && is_path_empty state
+   sel_pce_loc dest with | true -> dest | false -> let () =
+   print_endline "Your selected piece cannot move to that location.
+   Input a new destination location." in get_dest state sel_pce_loc *)
 
 (* ======================================================= *)
 
 (* [get_select_pce_loc state] is the location of the piece that the
-   player wants to select. If player selects a location without a piece,
-   this function keeps asking for a board location until the user inputs
-   a location with a piece on it.*)
+   player wants to select. If player selects a location without a piece
+   or invalid location, this function keeps asking for a board location
+   until the user inputs a valid location with a piece on it. Helper to
+   select_piece.*)
 let rec get_select_pce_loc state =
   let input = read_line () |> str_to_grid in
   match what_piece state input with
@@ -74,7 +85,8 @@ let rec get_select_pce_loc state =
           get_select_pce_loc state)
 (* ========================================== *)
 
-(* returns selected piece location *)
+(* [select_piece st] prompts player to select piece and calls helper to
+   enable piece selection. Helepr to [get_input_dest].*)
 let select_piece st =
   (* Prompt player to select the piece they want to move by inputting
      the piece's location. *)
@@ -93,7 +105,8 @@ let select_piece st =
 
 (* ============================================ *)
 
-(* gets piece on destination grid*)
+(* [get_pce_ont_dest st dest] is the piece on the specified destiantion
+   location. Helper to [actually_get_dest]*)
 let rec get_pce_on_dest state dest =
   match what_piece state dest with
   | exception InvalidLocation e ->
@@ -106,9 +119,58 @@ let rec get_pce_on_dest state dest =
       get_pce_on_dest state dest
   | p -> p
 
-(* ============================ *)
+(* ============================================ *)
 
-let rec get_dest_ex brd state sel_pce_loc =
+(*[get_dest_loc brd st p_loc] ask player for dest location; check to see
+  if the selected piece can be legally moved from starting to dest
+  location; if not, keep asking for a dest location until a valid dest
+  location for the selected piece is inputted. Also allows reselecting
+  the piece player wants to move. Helepr to [get_dest].*)
+let rec get_dest_loc brd state sel_pce_loc =
+  let dest = read_line () in
+  match dest with
+  | "reselect"
+  | "'reselect'" ->
+      let new_pce = select_piece state in
+      let () =
+        print_endline "";
+        print_endline
+          ("CURRENTLY SELECTED PIECE: "
+          ^ get_str_piece brd new_pce
+          ^ " at " ^ grid_to_str new_pce)
+      in
+      let () =
+        print_endline
+          "Input destination location in EXACT format (row,column). \
+           Upper left is (0,0) and bottom right is (7,7). NO SPACES! \
+           Or type 'reselect' to select a different piece.";
+        print_string ">"
+      in
+      get_dest_loc brd state new_pce
+  | x -> (
+      let dest = x |> str_to_grid in
+      let select_piece = what_piece state sel_pce_loc in
+      let pce_on_dest = get_pce_on_dest state dest in
+      match
+        is_legal select_piece pce_on_dest
+        && is_path_empty state sel_pce_loc dest
+      with
+      | true -> [ sel_pce_loc; dest ]
+      | false ->
+          let () =
+            print_endline
+              "Your selected piece cannot move to that location. Input \
+               new destination location or type 'reselect'.";
+            print_string ">"
+          in
+          get_dest_loc brd state sel_pce_loc)
+
+(* =================================================== *)
+
+(* [get_dest brd state loc] prompts for destination location and calls
+   [actually_get_dest] to get the destination location. Helper to
+   [get_input_dest].*)
+let get_dest brd state sel_pce_loc =
   (* Prompt for destination location. *)
   let () =
     print_endline "";
@@ -121,45 +183,23 @@ let rec get_dest_ex brd state sel_pce_loc =
     print_endline
       "Input destination location in EXACT format (row,column). Upper \
        left is (0,0) and bottom right is (7,7). NO SPACES!";
+    print_endline "Or type 'reselect' to select a different piece.";
     print_string ">"
   in
-  let dest = read_line () in
-  (* if dest is not a location, then reassign sel_pce_loc *)
-  match dest with
-  | "reselect" -> get_dest_ex brd state (select_piece state)
-  | x -> (
-      let dest = x |> str_to_grid in
-      let select_piece = what_piece state sel_pce_loc in
-      let pce_on_dest = get_pce_on_dest state dest in
-      match
-        is_legal select_piece pce_on_dest
-        && is_path_empty state sel_pce_loc dest
-      with
-      | true -> [ sel_pce_loc; dest ]
-      | false ->
-          let () =
-            (* Do I need to factor out each part I want to loop over and
-               over again to helper functions? *)
-            print_endline "";
-            print_endline
-              "Your selected piece cannot move to that location. Input \
-               a new destination location."
-          in
-          get_dest_ex brd state sel_pce_loc)
+  get_dest_loc brd state sel_pce_loc
 
 (* ================================================ *)
 
-(* Return list [starting location; destination loc] *)
+(* [get_input_dest brd st] is a list in form [starting location;
+   destination loc] with the starting and ending location of a move.
+   helepr to [play_game]. *)
 let rec get_input_dest brd st =
-  (* Get the location of the piece player wants to move. If location has
-     no piece, keep asking until player inputs location with piece. *)
+  (* Get the location of the piece player wants to move. *)
   let select_pce_loc = select_piece st in
 
-  (* Get the destination location - ask player for dest location; check
-     to see if the selected piece can be legally moved from starting to
-     dest location; if not, keep asking for a dest location until a
-     valid dest location for the selected piece is inputted.*)
-  get_dest_ex brd st select_pce_loc
+  (* Get the destination location and return a list with it and starting
+     location.*)
+  get_dest brd st select_pce_loc
 
 (* ================================================================== *)
 (* =======================END HELPER FUNCTIONS======================= *)
@@ -170,13 +210,13 @@ let rec play_game brd st =
   let () = print_endline "Current board:" in
   let () = print_board brd in
 
-  (* Get [input location;destination location] in list form let *)
+  (* Get [starting location;destination location] in list form *)
   let input_dest = get_input_dest brd st in
 
-  (* get starting position out of list *)
+  (* Get starting position out of list *)
   let select_pce_loc = List.hd input_dest in
 
-  (* get dest location out of list *)
+  (* Get dest location out of list *)
   let dest = input_dest |> List.tl |> List.hd in
 
   (* Move the piece the player selected to position dest. *)
@@ -217,7 +257,7 @@ let rec play_game brd st =
     print_endline "";
     print_endline "Keep playing? y or n"
   in
-  let keep_play = read_line () |> String.lowercase_ascii in
+  let keep_play = keep_playing () in
   if keep_play = "y" then
     (*If players want to continue, call play_game with the current board
       and state.*)
@@ -230,7 +270,7 @@ let rec play_game brd st =
 
 let main () =
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    "\n\nWelcome to Extremely Simple Chess.\n";
+    "\n\nWelcome to Chess.\n";
   let board = init_board () in
   let st = init_state board in
   play_game board st
