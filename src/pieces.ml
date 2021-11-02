@@ -33,6 +33,22 @@ let get_color p =
   | Black -> "B"
   | None -> "N"
 
+let piece_picture (p : piece) =
+  match (p.piece_type, p.color) with
+  | Pawn, White -> "♙"
+  | Pawn, Black -> "♟︎"
+  | Bishop, White -> "♗"
+  | Bishop, Black -> "♝"
+  | Knight, White -> "♘"
+  | Knight, Black -> "♞"
+  | Rook, White -> "♖"
+  | Rook, Black -> "♜"
+  | Queen, White -> "♕"
+  | Queen, Black -> "♛"
+  | King, White -> "♔"
+  | King, Black -> "♚"
+  | _ -> " "
+
 exception Illegal of string
 
 let is_piece (p : piece) = p.piece_type != None
