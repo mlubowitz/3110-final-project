@@ -227,7 +227,10 @@ let in_check_knight (st : t) (p : piece) =
      && knight_check_piece p (what_piece st (a + 2, b + 1))
 
 let in_check (st : t) (p : piece) =
-  if in_check_diagonals st p = false && in_check_orthog_adj st p = false
+  if
+    in_check_diagonals st p = false
+    && in_check_orthog_adj st p = false
+    && in_check_knight st p = false
   then false
   else true
 
