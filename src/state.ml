@@ -71,10 +71,10 @@ let rec verticle_path_empty
     match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
     | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
     | true -> what_piece st (fst loc1 - 1, snd loc1)
-  else if fst loc2 > fst loc1 + 1 then
-    match is_piece (what_piece st (fst loc2 - 1, snd loc2)) with
-    | false -> verticle_path_empty st (fst loc2 - 1, snd loc2) loc1
-    | true -> what_piece st (fst loc2 - 1, snd loc2)
+  else if fst loc1 < fst loc2 - 1 then
+    match is_piece (what_piece st (fst loc1 + 1, snd loc1)) with
+    | false -> verticle_path_empty st (fst loc1 + 1, snd loc1) loc1
+    | true -> what_piece st (fst loc1 + 1, snd loc1)
   else what_piece st loc2
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
@@ -127,8 +127,7 @@ let piece_in_path (st : t) (loc1 : int * int) (loc2 : int * int) =
   else what_piece st loc2
 
 let is_path_empty (st : t) (loc1 : int * int) (loc2 : int * int) =
-  if get_position (piece_in_path st loc1 loc2) = loc2 then true
-  else false
+  get_position (piece_in_path st loc1 loc2) = loc2
 
 (* ==================flip_state======================================== *)
 (*[flip_loc] changes the location of the piece to reflect flipped
@@ -153,50 +152,85 @@ let castle_side (st : t) (p2 : piece) =
 let diagonal_check_helper (st : t) (p : piece) =
   let a, b = get_position p in
   if a + b <= 7 then
-    diag_check_piece (piece_in_path st (a, b) (-1, a + b)) p
+    diag_check_piece p
+      (piece_in_path st (a, b) (0, a + b))
+      (what_piece st (0, a + b))
     (*top right diagonal*)
-    && diag_check_piece (piece_in_path st (a, b) (a + b, -1)) p
-    (*bottom left diagonal*)
+    || diag_check_piece p
+         (piece_in_path st (a, b) (a + b, 0))
+         (what_piece st (a + b, 0)) (*bottom left diagonal*)
   else
-    diag_check_piece (piece_in_path st (a, b) (a - b, 8)) p
+    diag_check_piece p
+      (piece_in_path st (a, b) (a - b, 7))
+      (what_piece st (a - b, 7))
     (*top right diagonal*)
-    && diag_check_piece (piece_in_path st (a, b) (8, a + b - 8)) p
+    || diag_check_piece p
+         (piece_in_path st (a, b) (7, a + b - 7))
+         (what_piece st (7, a + b - 7))
 
 (*bottom left diagonal*)
 let in_check_diagonals (st : t) (p : piece) =
   let a, b = get_position p in
   (*row > column to check diagonals for top left and bottom right*)
   if a >= b then
-    if
-      diag_check_piece (piece_in_path st (a, b) (a - b, -1)) p
-      (*top left diagonal*)
-      && diag_check_piece (piece_in_path st (a, b) (8, 8 - (a - b))) p
-      (*bottom right diagonal*)
-    then diagonal_check_helper st p
-    else false
-  else if a < b then
-    if
-      diag_check_piece (piece_in_path st (a, b) (-1, b - a)) p
-      (*top left diagonal*)
-      && diag_check_piece (piece_in_path st (a, b) (8 - (b - a), 8)) p
-      (*bottom right diagonal*)
-    then diagonal_check_helper st p
-    else false
-  else false
+    (diag_check_piece p
+       (piece_in_path st (a, b) (a - b, 0))
+       (what_piece st (a - b, 0))
+    (*top left diagonal*)
+    || diag_check_piece p
+         (piece_in_path st (a, b) (7, 7 - (a - b)))
+         (what_piece st (7, 7 - (a - b))))
+    (*bottom right diagonal*)
+    || diagonal_check_helper st p
+  else
+    (diag_check_piece p
+       (piece_in_path st (a, b) (0, b - a))
+       (what_piece st (0, b - a))
+    (*top left diagonal*)
+    || diag_check_piece p
+         (piece_in_path st (a, b) (7 - (b - a), 7))
+         (what_piece st (7 - (b - a), 7)))
+    (*bottom right diagonal*)
+    || diagonal_check_helper st p
 
 let in_check_orthog_adj (st : t) (p : piece) =
   let a, b = get_position p in
-  if a > 0 && b > 0 && a < 7 && b < 7 then
-    orthog_adj_check_piece (piece_in_path st (a, b) (a, -1)) p
-    && orthog_adj_check_piece (piece_in_path st (a, b) (a, 8)) p
-    && orthog_adj_check_piece (piece_in_path st (a, b) (-1, b)) p
-    && orthog_adj_check_piece (piece_in_path st (a, b) (8, b)) p
-  else false
+  orthog_adj_check_piece p
+    (piece_in_path st (a, b) (a, 0))
+    (what_piece st (a, 0))
+  || orthog_adj_check_piece p
+       (piece_in_path st (a, b) (a, 7))
+       (what_piece st (a, 7))
+  || orthog_adj_check_piece p
+       (piece_in_path st (a, b) (0, b))
+       (what_piece st (0, b))
+  || orthog_adj_check_piece p
+       (piece_in_path st (a, b) (7, b))
+       (what_piece st (7, b))
 
-let in_check_knight (st : t) (p : piece) = failwith "Unimplemented"
+let in_check_knight (st : t) (p : piece) =
+  let a, b = get_position p in
+  (a > 1 && b > 0 && knight_check_piece p (what_piece st (a - 2, b - 1)))
+  || a > 1 && b < 7
+     && knight_check_piece p (what_piece st (a - 2, b + 1))
+  || a > 0 && b > 1
+     && knight_check_piece p (what_piece st (a - 1, b - 2))
+  || a > 0 && b < 6
+     && knight_check_piece p (what_piece st (a - 1, b + 2))
+  || a < 7 && b > 1
+     && knight_check_piece p (what_piece st (a + 1, b - 2))
+  || a < 7 && b < 6
+     && knight_check_piece p (what_piece st (a + 1, b + 2))
+  || a < 6 && b > 0
+     && knight_check_piece p (what_piece st (a + 2, b - 1))
+  || a < 6 && b < 7
+     && knight_check_piece p (what_piece st (a + 2, b + 1))
 
 let in_check (st : t) (p : piece) =
-  if in_check_diagonals st p = false && in_check_orthog_adj st p = false
+  if
+    in_check_diagonals st p = false
+    && in_check_orthog_adj st p = false
+    && in_check_knight st p = false
   then false
   else true
 

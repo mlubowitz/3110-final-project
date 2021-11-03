@@ -33,6 +33,22 @@ let get_color p =
   | Black -> "B"
   | None -> "N"
 
+let piece_picture (p : piece) =
+  match (p.piece_type, p.color) with
+  | Pawn, White -> "♙"
+  | Pawn, Black -> "♟︎"
+  | Bishop, White -> "♗"
+  | Bishop, Black -> "♝"
+  | Knight, White -> "♘"
+  | Knight, Black -> "♞"
+  | Rook, White -> "♖"
+  | Rook, Black -> "♜"
+  | Queen, White -> "♕"
+  | Queen, Black -> "♛"
+  | King, White -> "♔"
+  | King, Black -> "♚"
+  | _ -> " "
+
 exception Illegal of string
 
 let is_piece (p : piece) = p.piece_type != None
@@ -187,17 +203,26 @@ let first_move (p : piece) = { p with no_first_move = false }
 let new_loc_piece (p : piece) (new_loc : int * int) =
   { p with position = new_loc }
 
-let diag_check_piece (p : piece) (p2 : piece) =
-  if p.color = p2.color then false
-  else if p2.piece_type = Queen || p2.piece_type = Bishop then true
-  else if p2.piece_type = Pawn && fst p2.position - fst p.position = 1
+let piece_check_checker (p : piece) (p2 : piece) (p3 : piece) =
+  if p = p2 then p3 else p2
+
+let diag_check_piece (p : piece) (p2 : piece) (p3 : piece) =
+  let pp = piece_check_checker p p2 p3 in
+  if p.color = pp.color then false
+  else if
+    pp.piece_type = Queen || pp.piece_type = Bishop
+    || (pp.piece_type = Pawn && fst pp.position - fst p.position = 1)
   then true
   else false
 
-let orthog_adj_check_piece (p : piece) (p2 : piece) =
-  if p.color = p2.color then false
-  else if p2.piece_type = Rook || p2.piece_type = Queen then true
+let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
+  let pp = piece_check_checker p p2 p3 in
+  if p.color = pp.color then false
+  else if pp.piece_type = Rook || pp.piece_type = Queen then true
   else false
 
 let knight_check_piece (p : piece) (p2 : piece) =
-  failwith "Unimplemented"
+  if p.color != p2.color && p2.piece_type = Knight then true else false
+
+let en_passant (p : piece) =
+  if p.piece_type = Pawn && fst p.position = 0 then true else false
