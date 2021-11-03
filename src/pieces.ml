@@ -33,6 +33,22 @@ let get_color p =
   | Black -> "B"
   | None -> "N"
 
+let piece_picture (p : piece) =
+  match (p.piece_type, p.color) with
+  | Pawn, White -> "♙"
+  | Pawn, Black -> "♟︎"
+  | Bishop, White -> "♗"
+  | Bishop, Black -> "♝"
+  | Knight, White -> "♘"
+  | Knight, Black -> "♞"
+  | Rook, White -> "♖"
+  | Rook, Black -> "♜"
+  | Queen, White -> "♕"
+  | Queen, Black -> "♛"
+  | King, White -> "♔"
+  | King, Black -> "♚"
+  | _ -> " "
+
 exception Illegal of string
 
 let is_piece (p : piece) = p.piece_type != None
@@ -207,3 +223,6 @@ let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
 
 let knight_check_piece (p : piece) (p2 : piece) =
   if p.color != p2.color && p2.piece_type = Knight then true else false
+
+let en_passant (p : piece) =
+  if p.piece_type = Pawn && fst p.position = 0 then true else false
