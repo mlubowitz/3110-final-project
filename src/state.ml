@@ -73,7 +73,7 @@ let rec verticle_path_empty
     | true -> what_piece st (fst loc1 - 1, snd loc1)
   else if fst loc1 < fst loc2 - 1 then
     match is_piece (what_piece st (fst loc1 + 1, snd loc1)) with
-    | false -> verticle_path_empty st (fst loc1 + 1, snd loc1) loc1
+    | false -> verticle_path_empty st (fst loc1 + 1, snd loc1) loc2
     | true -> what_piece st (fst loc1 + 1, snd loc1)
   else what_piece st loc2
 
