@@ -1,8 +1,8 @@
-For MS1, we have a very simple chess game run in ANSITerminal that
-has only pawns and obeys general movement rules for pawns. 
+For MS2, we have a chess game run in ANSITerminal that
+has all pieces that follows their general movement rules.
 
 ----------------------------------------------------
-How to run our Chess game for MS1 with ANSITerminal:
+How to run our Chess game for MS2 with ANSITerminal:
 1. Ensure you have ANSITerminal installed. If you don't have ANSITerminal,
 please install with opam using "opam install graphics". You will also need to
 install the OCaml graphics library to avoid "Unbound module" errors. Install
@@ -10,11 +10,11 @@ using "opam install graphics".
 
 2. Download the folder with all game files onto computer.
 
-3. Open a terminal window and navigatie to the root directory
+3. Open a terminal window and navigate to the root directory
 of the game. Type "make play" and press enter.
 
-4. Follow directions of game carefully. Not following directions
-exactly can result in exceptions and a crash (at least currently).
+4. Follow directions of game carefully. It is possible there may be a crash
+if directions are not followed carefully.
 
 ----------------------------------------------------
 How to view the graphics we have so far:

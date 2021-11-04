@@ -153,9 +153,9 @@ let rec get_dest_loc brd state sel_pce_loc =
       let pce_on_dest = get_pce_on_dest state dest in
       match
         is_legal select_piece pce_on_dest
-        && is_path_empty state sel_pce_loc dest
+        && is_path_empty state sel_pce_loc (get_position pce_on_dest)
       with
-      | true -> [ sel_pce_loc; dest ]
+      | true -> [ sel_pce_loc; get_position pce_on_dest ]
       | false ->
           let () =
             print_endline
