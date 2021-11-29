@@ -377,13 +377,13 @@ let () = main ()
 (* ================================================================== *)
 
 let is_castle state (p : piece) (p2 : piece) =
-  if
-    is_king p
-    && abs (snd (get_position p) - snd (get_position p2)) > 1
-    && fst (get_position p) = fst (get_position p2)
-  then
-    let p3 = castle_side state p2 in
-    if is_path_empty state (get_position p) (get_position p3) then
-      can_castle p p3
-    else false
-  else false
+  let pFst, pSnd = get_position p in
+  let p2Fst, p2Snd = get_position p in
+  let p3 = castle_side state p2 in
+  is_king p
+  && abs (pSnd - p2Snd) = 2
+  && pFst = p2Fst
+  && in_check state (what_piece state (7, 4 + ((p2Snd - pSnd) / 2)))
+     = false
+  && can_castle p p3
+  && is_path_empty state (get_position p) (get_position p3)
