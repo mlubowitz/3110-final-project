@@ -36,5 +36,5 @@ val in_check : t -> Pieces.piece -> bool
 (**[in_check st p] returns [true] if the king is in check *)
 
 val find_king : t -> string -> int * int
-(* [fing_king st c] is the location of the king with color [c] in state
-   [st]. *)
+(** [fing_king st c] is the location of the king with color [c] in state
+    [st]. Colors are "W", "B", or "N" (no color).*)
