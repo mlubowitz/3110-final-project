@@ -3,10 +3,17 @@ open Board
 open State
 open Pieces
 
-(* To play type "make play" in terminal once navigating to root
-   directory.*)
+type location = int * int
 
+type updateinfo =
+  | Location of location
+  | Castle of bool
+  | Board of Board.t
+  | State of State.t
+
+(* ================================================================== *)
 (* ====================START HELPER FUNCTIONS======================== *)
+(* ================================================================== *)
 (* ================================================================== *)
 
 (*Converts str version of tuple to a regular tuple. Example: ["(3,5)"
@@ -14,14 +21,15 @@ open Pieces
 let str_to_grid str =
   (int_of_char str.[1] - 48, int_of_char str.[3] - 48)
 
+(* ======================================================= *)
+
 (*Converts regular version of tuple to a string. Example: [(3,5) becomes
   "(3,5)"]. *)
 let grid_to_str grid =
   "(" ^ string_of_int (fst grid) ^ "," ^ string_of_int (snd grid) ^ ")"
 
-(* [keep_playing] is y or no depending on if player wants to play. If
-   player doesn't input y or n, this function keeps asking for y or
-   n. *)
+(* ======================================================= *)
+
 let rec keep_playing () =
   let input = read_line () in
   match input with
@@ -38,31 +46,10 @@ let rec keep_playing () =
   | x ->
       let () = print_endline "Please type y or n" in
       keep_playing ()
-(* Not using below right now. *)
-
-(* [get_dest brd state sel_pce_loc] is the valid destination location
-   that the user wants to move their selected piece to. This function
-   calls is_legal and is_path_empty to determine if the selected piece
-   is able to move to the dest location the player inputs. If illegal
-   move, player is prompted for a different dest location, and this
-   repeats until valid dest is inputted.*)
-(* let rec get_dest state sel_pce_loc = let dest = read_line () |>
-   str_to_grid in let select_piece = what_piece state sel_pce_loc in let
-   pce_on_dest = what_piece state dest in
-
-   match is_legal select_piece pce_on_dest && is_path_empty state
-   sel_pce_loc dest with | true -> dest | false -> let () =
-   print_endline "Your selected piece cannot move to that location.
-   Input a new destination location." in get_dest state sel_pce_loc *)
 
 (* ======================================================= *)
 
-(* [get_select_pce_loc state] is the location of the piece that the
-   player wants to select. If player selects a location without a piece
-   or invalid location, this function keeps asking for a board location
-   until the user inputs a valid location with a piece on it. Helper to
-   select_piece.*)
-let rec get_select_pce_loc state =
+let rec get_sel_pce_loc state =
   let input = read_line () |> str_to_grid in
   match what_piece state input with
   | exception InvalidLocation e ->
@@ -71,7 +58,7 @@ let rec get_select_pce_loc state =
           "Not valid board location. Input another location.";
         print_string ">"
       in
-      get_select_pce_loc state
+      get_sel_pce_loc state
   | p -> (
       let piece = p in
       match is_piece piece with
@@ -82,14 +69,11 @@ let rec get_select_pce_loc state =
               "Not a piece. Input location of piece you want to select.";
             print_string ">"
           in
-          get_select_pce_loc state)
-(* ========================================== *)
+          get_sel_pce_loc state)
 
-(* [select_piece st] prompts player to select piece and calls helper to
-   enable piece selection. Helepr to [get_input_dest].*)
+(* ================================================================== *)
+
 let select_piece st =
-  (* Prompt player to select the piece they want to move by inputting
-     the piece's location. *)
   let () =
     print_endline "";
     print_endline
@@ -98,15 +82,94 @@ let select_piece st =
        is (7,7). NO SPACES!";
     print_string ">"
   in
+  get_sel_pce_loc st
 
-  (* Get the location of the piece player wants to move. If location has
-     no piece, keep asking until player inputs location with piece. *)
-  get_select_pce_loc st
+(* ================================================================== *)
 
-(* ============================================ *)
+let get_rk_fin_loc king_dest =
+  match king_dest with
+  | 7, 6 -> (7, 5)
+  | 7, 5 -> (7, 4)
+  | 7, 2 -> (7, 3)
+  | 7, 1 -> (7, 2)
+  | _ -> failwith "This should never be reached"
 
-(* [get_pce_ont_dest st dest] is the piece on the specified destiantion
-   location. Helper to [actually_get_dest]*)
+(* ================================================================== *)
+
+let update_st_castle st king_loc king_dest =
+  let rook_loc =
+    match king_dest with
+    | 7, 6
+    | 7, 5 ->
+        (7, 7)
+    | 7, 2
+    | 7, 1 ->
+        (7, 0)
+    | _ -> failwith "This should never be reached"
+  in
+  let rook_fin_loc = get_rk_fin_loc king_dest in
+  let moved_king = what_piece st king_loc |> first_move in
+  let moved_rook = what_piece st rook_loc |> first_move in
+  let st = update_loc st king_dest moved_king in
+  let st = update_loc st rook_fin_loc moved_rook in
+  let st = update_loc st king_loc (to_piece king_loc "[ ]") in
+  let st = update_loc st rook_loc (to_piece rook_loc "[ ]") in
+  st
+(* ========================================================= *)
+
+let complete_castle brd st king_loc king_dest =
+  let rook_fin_loc = get_rk_fin_loc king_dest in
+
+  let brd = move_piece brd king_loc king_dest in
+  let brd =
+    match king_dest with
+    | 7, 6
+    | 7, 5 ->
+        move_piece brd (7, 7) rook_fin_loc
+    | 7, 2
+    | 7, 1 ->
+        move_piece brd (7, 0) rook_fin_loc
+    | _ -> failwith "This should never be reached"
+  in
+
+  let new_st = update_st_castle st king_loc king_dest in
+
+  [ Board brd; State new_st ]
+
+(* ============================================================ *)
+
+let update_st_norm_move st sel_pce_loc dest =
+  (* Get the moved piece and mark it as having moved at least once. *)
+  let moved_piece = what_piece st sel_pce_loc |> first_move in
+  let st = update_loc st dest moved_piece in
+  let st = update_loc st sel_pce_loc (to_piece sel_pce_loc "[ ]") in
+  st
+
+(* ============================================================ *)
+
+let normal_move brd st sel_pce_loc dest =
+  let new_brd = move_piece brd sel_pce_loc dest in
+  let new_st = update_st_norm_move st sel_pce_loc dest in
+  [ Board new_brd; State new_st ]
+
+(* ======================================================== *)
+
+let castle_allowed state king_loc king_dest =
+  let king_pce = what_piece state king_loc in
+  let king_color = get_color king_pce in
+  let val_dest =
+    match king_color with
+    | "W" -> king_dest = (7, 6) || king_dest = (7, 2)
+    | "B" -> king_dest = (7, 5) || king_dest = (7, 1)
+    | _ -> failwith "This should never be reached."
+  in
+  val_dest
+  && (can_castle king_pce (what_piece state (7, 7))
+     || can_castle king_pce (what_piece state (7, 0)))
+  && is_path_empty state king_loc king_dest
+
+(* ======================================================= *)
+
 let rec get_pce_on_dest state dest =
   match what_piece state dest with
   | exception InvalidLocation e ->
@@ -119,13 +182,8 @@ let rec get_pce_on_dest state dest =
       get_pce_on_dest state dest
   | p -> p
 
-(* ============================================ *)
+(* =================================================== *)
 
-(*[get_dest_loc brd st p_loc] ask player for dest location; check to see
-  if the selected piece can be legally moved from starting to dest
-  location; if not, keep asking for a dest location until a valid dest
-  location for the selected piece is inputted. Also allows reselecting
-  the piece player wants to move. Helepr to [get_dest].*)
 let rec get_dest_loc brd state sel_pce_loc =
   let dest = read_line () in
   match dest with
@@ -147,15 +205,29 @@ let rec get_dest_loc brd state sel_pce_loc =
         print_string ">"
       in
       get_dest_loc brd state new_pce
-  | x -> (
-      let dest = x |> str_to_grid in
-      let select_piece = what_piece state sel_pce_loc in
-      let pce_on_dest = get_pce_on_dest state dest in
+  | x -> chk_castl_and_legl brd state sel_pce_loc x
+
+(* =======MUTUAL RECURSION=================== *)
+
+and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
+  let dest = dest_inpt |> str_to_grid in
+  let selected_piece = what_piece state sel_pce_loc in
+  let pce_on_dest = get_pce_on_dest state dest in
+
+  (* dest may have changed in get_pce_on_dest *)
+  let dest = get_position pce_on_dest in
+
+  match
+    (* checking for castling *)
+    selected_piece |> is_king && castle_allowed state sel_pce_loc dest
+  with
+  | true -> check_in_check brd state sel_pce_loc dest true
+  | false -> (
       match
-        is_legal select_piece pce_on_dest
-        && is_path_empty state sel_pce_loc (get_position pce_on_dest)
+        is_legal selected_piece pce_on_dest
+        && is_path_empty state sel_pce_loc dest
       with
-      | true -> [ sel_pce_loc; get_position pce_on_dest ]
+      | true -> check_in_check brd state sel_pce_loc dest false
       | false ->
           let () =
             print_endline
@@ -165,13 +237,31 @@ let rec get_dest_loc brd state sel_pce_loc =
           in
           get_dest_loc brd state sel_pce_loc)
 
-(* =================================================== *)
+(* =======MUTUAL RECURSION=================== *)
 
-(* [get_dest brd state loc] prompts for destination location and calls
-   [actually_get_dest] to get the destination location. Helper to
-   [get_input_dest].*)
+and check_in_check brd st sel_pce_loc dest castle =
+  let player_color = what_piece st sel_pce_loc |> get_color in
+  let st_w_move =
+    if castle then update_st_castle st sel_pce_loc dest
+    else update_st_norm_move st sel_pce_loc dest
+  in
+  let is_in_check =
+    in_check st_w_move
+      (find_king st_w_move player_color |> what_piece st_w_move)
+  in
+  if is_in_check then
+    let () =
+      print_endline
+        "You would be in check with that move. Can't move. Input new \
+         destination location or 'reselect' piece.";
+      print_string ">"
+    in
+    get_dest_loc brd st sel_pce_loc
+  else [ Location sel_pce_loc; Location dest; Castle castle ]
+
+(* ============================================================ *)
+
 let get_dest brd state sel_pce_loc =
-  (* Prompt for destination location. *)
   let () =
     print_endline "";
     print_endline
@@ -188,83 +278,89 @@ let get_dest brd state sel_pce_loc =
   in
   get_dest_loc brd state sel_pce_loc
 
-(* ================================================ *)
+(* ===================================================== *)
 
-(* [get_input_dest brd st] is a list in form [starting location;
-   destination loc] with the starting and ending location of a move.
-   helepr to [play_game]. *)
 let rec get_input_dest brd st =
-  (* Get the location of the piece player wants to move. *)
-  let select_pce_loc = select_piece st in
+  let sel_pce_loc = select_piece st in
 
   (* Get the destination location and return a list with it and starting
      location.*)
-  get_dest brd st select_pce_loc
+  get_dest brd st sel_pce_loc
 
 (* ================================================================== *)
 (* =======================END HELPER FUNCTIONS======================= *)
+(* ================================================================== *)
+(* ================================================================== *)
 
 (* THE MAIN FUNCTION FOR GAMEPLAY. *)
 let rec play_game brd st =
-  (* Print current board *)
   let () = print_endline "Current board:" in
   let () = print_board brd in
 
-  (* Get [starting location;destination location] in list form *)
+  (* Get [starting loc; dest loc; castle?] in list form *)
   let input_dest = get_input_dest brd st in
 
   (* Get starting position out of list *)
-  let select_pce_loc = List.hd input_dest in
-
-  (* Get dest location out of list *)
-  let dest = input_dest |> List.tl |> List.hd in
-
-  (* Move the piece the player selected to position dest. *)
-  let brd = move_piece brd select_pce_loc dest in
-
-  (* Get the moved piece and mark it as having moved at least once. *)
-  let moved_piece = what_piece st select_pce_loc |> first_move in
-
-  (* Update the state so it reflects the updated board. There needs to
-     be 2 function calls to fully update state after a move. The first
-     call to update_loc connects the dest location to moved_piece in the
-     assoc list. The second call to update_loc puts a None piece on the
-     original spot of moved_piece. *)
-  let st = update_loc st dest moved_piece in
-  let st =
-    update_loc st select_pce_loc (to_piece select_pce_loc "[ ]")
+  let select_pce_loc =
+    match List.hd input_dest with
+    | Location x -> x
+    | _ -> failwith "This should never be reached."
   in
 
-  (* Tell player that move is complete and print the updated board. *)
+  (* Get dest location out of list *)
+  let dest =
+    match input_dest |> List.tl |> List.hd with
+    | Location x -> x
+    | _ -> failwith "This should never be reached."
+  in
+
+  (* Get bool of if castling needed. *)
+  let do_castle =
+    match List.nth input_dest 2 with
+    | Castle b -> b
+    | _ -> failwith "This should never be reached."
+  in
+
+  (* Move piece(s) appropriately and return list of new board and
+     state. *)
+  let updated_game =
+    match do_castle with
+    | true -> complete_castle brd st select_pce_loc dest
+    | false -> normal_move brd st select_pce_loc dest
+  in
+
+  (* Extract updated board from list. *)
+  let brd =
+    match List.hd updated_game with
+    | Board b -> b
+    | _ -> failwith "This should never be reached."
+  in
+
+  (* Extract updated state from list. *)
+  let st =
+    match updated_game |> List.tl |> List.hd with
+    | State s -> s
+    | _ -> failwith "This should never be reached."
+  in
+
   let () = print_endline "Move complete:" in
   let () = print_board brd in
 
   (* COULD CALL A FUNCTION AT THIS POINT TO CHECK FOR CHECKMATE. IF
      CHECKMATE, THEN THE GAME WOULD STOP AND A WINNER WOULD BE PRINTED
      OUT AT THIS POINT. *)
-
-  (* "Flip" board orientation so opposing player can read board easily.
-     Print this board out. In addition, the state must be "flipped" to
-     accurately reflect what piece is on which board location.*)
   let brd = flip brd in
   let st = flip_state st in
   let () = print_endline "" in
   let () = print_endline "Next player - board flipped: " in
   let () = print_board brd in
 
-  (* Ask if players want to keep playing. *)
   let () =
     print_endline "";
     print_endline "Keep playing? y or n"
   in
   let keep_play = keep_playing () in
-  if keep_play = "y" then
-    (*If players want to continue, call play_game with the current board
-      and state.*)
-    play_game brd st
-    (*If players want to stop, print a end of game message and allow
-      play_game to terminate. *)
-  else print_endline "Goodbye!"
+  if keep_play = "y" then play_game brd st else print_endline "Goodbye!"
 
 (* ================================================================== *)
 
@@ -278,7 +374,7 @@ let main () =
 (* Starts game. *)
 let () = main ()
 
-(*CODE ABOVE DOES NOT HANDLE WINNING THE GAME. *)
+(* ================================================================== *)
 
 let is_castle state (p : piece) (p2 : piece) =
   if

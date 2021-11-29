@@ -18,9 +18,10 @@ val init_board : unit -> t
    side. Black pieces on top and white on bottom. *)
 
 val move_piece : t -> grid -> grid -> t
-(** [move_piece board ori_loc new_loc] is an updated board with the
-    piece at [ori_loc] moved to location [new_loc]. The location
-    [ori_loc] is set to an empty grid (no piece on it).*)
+(** [move_piece brd ori_loc new_loc] is a copy of the updated board
+    [brd] with the piece at [ori_loc] moved to location [new_loc]. The
+    location [ori_loc] is set to an empty grid (no piece on it). The
+    original [brd] has also been mutated.*)
 
 val flip : t -> t
 (**[flip b] is a reversed board [b] so that the top is now the bottom,
