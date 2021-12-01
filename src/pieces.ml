@@ -25,6 +25,8 @@ let get_position p = p.position
 
 let is_king p = p.piece_type = King
 
+let is_pawn p = p.piece_type = Pawn
+
 let get_no_first_move p = p.no_first_move
 
 let get_color p =

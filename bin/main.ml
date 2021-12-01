@@ -382,8 +382,12 @@ let is_castle state (p : piece) (p2 : piece) =
   let p3 = castle_side state p2 in
   is_king p
   && abs (pSnd - p2Snd) = 2
-  && pFst = p2Fst
-  && in_check state (what_piece state (7, 4 + ((p2Snd - pSnd) / 2)))
-     = false
-  && can_castle p p3
+  && pFst = p2Fst && can_castle p p3
   && is_path_empty state (get_position p) (get_position p3)
+  &&
+  if get_color p = "W" then
+    in_check state (what_piece state (7, 4 + ((p2Snd - pSnd) / 2)))
+    = false
+  else
+    in_check state (what_piece state (7, 3 + ((p2Snd - pSnd) / 2)))
+    = false

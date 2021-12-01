@@ -14,6 +14,9 @@ val get_position : piece -> int * int
 val is_king : piece -> bool
 (** [is_king p] is [true] if [p] is a [King]*)
 
+val is_pawn : piece -> bool
+(** [is_pawn p] is [true] if [p] is a [Pawn]*)
+
 val is_piece : piece -> bool
 (** [is_king p] is [true] if [p] is a piece and [false] otherise*)
 

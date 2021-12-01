@@ -38,3 +38,7 @@ val in_check : t -> Pieces.piece -> bool
 val find_king : t -> string -> int * int
 (** [fing_king st c] is the location of the king with color [c] in state
     [st]. Colors are "W", "B", or "N" (no color).*)
+
+val promotion : t -> Pieces.piece -> int * int -> bool
+(**[promotion st p pdest] is true if p is a [Pawn] and it is moved to
+   the first row*)
