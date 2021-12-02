@@ -446,3 +446,39 @@ let checkpath_list (st : t) (p : piece) =
   else path_list st p1 p2 c1 c2
 
 let state_to_list (st : t) : ((int * int) * piece) list = st
+
+(* ==================alphanum_to_num================================ *)
+
+let white_alphanum_num (input : string) =
+  let num = input.[1] |> Char.escaped |> int_of_string in
+  match input.[0] with
+  | 'a' -> (8 - num, 0)
+  | 'b' -> (8 - num, 1)
+  | 'c' -> (8 - num, 2)
+  | 'd' -> (8 - num, 3)
+  | 'e' -> (8 - num, 4)
+  | 'f' -> (8 - num, 5)
+  | 'g' -> (8 - num, 6)
+  | 'h' -> (8 - num, 7)
+  | _ -> failwith "not possible"
+
+let black_alphanum_num (input : string) =
+  let num = input.[1] |> Char.escaped |> int_of_string in
+  match input.[0] with
+  | 'a' -> (8 - num, 0)
+  | 'b' -> (8 - num, 1)
+  | 'c' -> (8 - num, 2)
+  | 'd' -> (8 - num, 3)
+  | 'e' -> (8 - num, 4)
+  | 'f' -> (8 - num, 5)
+  | 'g' -> (8 - num, 6)
+  | 'h' -> (8 - num, 7)
+  | _ -> failwith "not possible"
+
+(*"alpha numeric" ==> (numeric - 1, alpha) *)
+let alphanum_to_num (st : t) (input : string) color =
+  let alphaNum = String.lowercase_ascii input in
+  match color with
+  | "W" -> white_alphanum_num alphaNum
+  | "B" -> black_alphanum_num alphaNum
+  | _ -> failwith "not possible"
