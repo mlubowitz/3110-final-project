@@ -395,7 +395,10 @@ let is_castle state (p : piece) (p2 : piece) =
 
 let en_passant state (p : piece) (p2 : piece) = "unimplemented"
 
-let rec can_block_check
+(*Helper function for checkmate and stalemate. Checks every piece of the
+  person who's turn it is color to see if they can move without causing
+  the king to be in check*)
+let rec possible_move_exists
     (state : State.t)
     t
     color
@@ -405,7 +408,7 @@ let rec can_block_check
   | (l, p) :: t ->
       if color = get_color p then
         match pos_lst with
-        | [] -> can_block_check state t color pos_lst
+        | [] -> possible_move_exists state t color pos_lst
         | k :: m ->
             if is_legal (what_piece state k) p then
               let st_w_move = update_st_norm_move state l k in
@@ -413,15 +416,23 @@ let rec can_block_check
                 in_check st_w_move
                   (find_king st_w_move color |> what_piece st_w_move)
               in
-              if is_in_check then can_block_check state t color pos_lst
+              if is_in_check then
+                possible_move_exists state t color pos_lst
               else true
-            else can_block_check state t color pos_lst
-      else can_block_check state t color pos_lst
+            else possible_move_exists state t color pos_lst
+      else possible_move_exists state t color pos_lst
 
+(* If the king is in check, given the color and state this determines if
+   that check is checkamte*)
 let checkmate (st : t) color =
   let king = what_piece st (find_king st color) in
   if can_piece_move st king then false
   else
     let pos_list = checkpath_list st king in
     let t = state_to_list st in
-    can_block_check st t color pos_list
+    possible_move_exists st t color pos_list
+
+let stalemate (st : t) color =
+  let t = state_to_list st in
+  let locs = List.map (fun x -> fst x) t in
+  possible_move_exists st t color locs
