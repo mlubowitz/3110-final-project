@@ -444,3 +444,5 @@ let checkpath_list (st : t) (p : piece) =
   let p1, p2 = get_position p in
   if get_piece_type checkPiece = "N" then []
   else path_list st p1 p2 c1 c2
+
+let state_to_list (st : t) : ((int * int) * piece) list = st
