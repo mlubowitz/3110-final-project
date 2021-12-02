@@ -21,11 +21,17 @@ type piece = {
   no_first_move : bool;
 }
 
+let get_piece_type (p : piece) =
+  match p.piece_type with
+  | Pawn -> "P"
+  | Bishop -> "B"
+  | Knight -> "N"
+  | Rook -> "R"
+  | Queen -> "Q"
+  | King -> "K"
+  | _ -> ""
+
 let get_position p = p.position
-
-let is_king p = p.piece_type = King
-
-let is_pawn p = p.piece_type = Pawn
 
 let get_no_first_move p = p.no_first_move
 
@@ -182,7 +188,9 @@ let king_is_legal ori_loc new_loc =
 let id x = x
 
 let is_legal (p : piece) (p2 : piece) =
-  if p.color = p2.color then false
+  let a, b = get_position p2 in
+  if a < 0 || a > 7 || b < 0 || b > 7 then false
+  else if p.color = p2.color then false
   else
     (* let piece = (what_piece st ori_loc) |> id in match
        piece.piece_type with *)
@@ -210,21 +218,21 @@ let piece_check_checker (p : piece) (p2 : piece) (p3 : piece) =
 
 let diag_check_piece (p : piece) (p2 : piece) (p3 : piece) =
   let pp = piece_check_checker p p2 p3 in
-  if p.color = pp.color then false
+  if p.color = pp.color then p
   else if
     pp.piece_type = Queen || pp.piece_type = Bishop
     || (pp.piece_type = Pawn && fst pp.position - fst p.position = 1)
-  then true
-  else false
+  then pp
+  else p
 
 let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
   let pp = piece_check_checker p p2 p3 in
-  if p.color = pp.color then false
-  else if pp.piece_type = Rook || pp.piece_type = Queen then true
-  else false
+  if p.color = pp.color then p
+  else if pp.piece_type = Rook || pp.piece_type = Queen then pp
+  else p
 
 let knight_check_piece (p : piece) (p2 : piece) =
-  if p.color != p2.color && p2.piece_type = Knight then true else false
+  if p.color != p2.color && p2.piece_type = Knight then p2 else p
 
 let en_passant (p : piece) =
   if p.piece_type = Pawn && fst p.position = 0 then true else false
