@@ -42,3 +42,12 @@ val find_king : t -> string -> int * int
 val promotion : t -> Pieces.piece -> int * int -> bool
 (**[promotion st p pdest] is true if p is a [Pawn] and it is moved to
    the first row*)
+
+val can_piece_move : t -> Pieces.piece -> bool
+(**[can_piece_move st p] is true if a piece has any legal moves on the
+   board*)
+
+val checkpath_list : t -> Pieces.piece -> (int * int) list
+(**[checkpath_list st p] is the list of all positions on the board
+   between the king and the piece that is putting it in check, including
+   the position of the piece giving the check*)

@@ -8,14 +8,11 @@ exception Illegal of string
 type piece
 (** The abstract type of values representing game pieces. *)
 
+val get_piece_type : piece -> string
+(** [get_piece_type p] is the piece type of piece [p]*)
+
 val get_position : piece -> int * int
 (** [get_position p] is the position of piece [p]*)
-
-val is_king : piece -> bool
-(** [is_king p] is [true] if [p] is a [King]*)
-
-val is_pawn : piece -> bool
-(** [is_pawn p] is [true] if [p] is a [Pawn]*)
 
 val is_piece : piece -> bool
 (** [is_king p] is [true] if [p] is a piece and [false] otherise*)
@@ -41,13 +38,13 @@ val can_castle : piece -> piece -> bool
 (** [can_castle p1 p3] returns [true] if [p3] is a rook and neither [p1]
     nor [p3] has moved, and [false] otherwise*)
 
-val diag_check_piece : piece -> piece -> piece -> bool
+val diag_check_piece : piece -> piece -> piece -> piece
 (** [diag_check_piece p p2] determines if [p2] is checking [p]*)
 
-val orthog_adj_check_piece : piece -> piece -> piece -> bool
+val orthog_adj_check_piece : piece -> piece -> piece -> piece
 (** [diag_check_piece p p2] determines if [p2] is checking [p]*)
 
-val knight_check_piece : piece -> piece -> bool
+val knight_check_piece : piece -> piece -> piece
 (** [knight_check_piece p p2] determines if [p2] is checking [p]*)
 
 val get_color : piece -> string

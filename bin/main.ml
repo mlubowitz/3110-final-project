@@ -219,7 +219,8 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
 
   match
     (* checking for castling *)
-    selected_piece |> is_king && castle_allowed state sel_pce_loc dest
+    selected_piece |> get_piece_type = "K"
+    && castle_allowed state sel_pce_loc dest
   with
   | true -> check_in_check brd state sel_pce_loc dest true
   | false -> (
@@ -380,7 +381,7 @@ let is_castle state (p : piece) (p2 : piece) =
   let pFst, pSnd = get_position p in
   let p2Fst, p2Snd = get_position p in
   let p3 = castle_side state p2 in
-  is_king p
+  get_piece_type p = "K"
   && abs (pSnd - p2Snd) = 2
   && pFst = p2Fst && can_castle p p3
   && is_path_empty state (get_position p) (get_position p3)
@@ -391,3 +392,12 @@ let is_castle state (p : piece) (p2 : piece) =
   else
     in_check state (what_piece state (7, 3 + ((p2Snd - pSnd) / 2)))
     = false
+
+let en_passant state (p : piece) (p2 : piece) = "unimplemented"
+
+(* let rec can_block_check t color pos_lst = match t with | [] -> "you
+   are in checkmate" | (l, p) :: t -> let st_w_move =
+
+   let checkmate (st : t) color = let king = what_piece st (find_king st
+   color) in if can_piece_move st king then false else let pos_list =
+   checkpath_list st king in *)
