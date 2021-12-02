@@ -51,3 +51,6 @@ val checkpath_list : t -> Pieces.piece -> (int * int) list
 (**[checkpath_list st p] is the list of all positions on the board
    between the king and the piece that is putting it in check, including
    the position of the piece giving the check*)
+
+val state_to_list : t -> ((int * int) * Pieces.piece) list
+(**[state_to_list t] is a list of the list given by t*)
