@@ -40,15 +40,25 @@ let rec what_piece (st : t) (loc : int * int) =
 
 (* ==================update_loc======================================== *)
 
-let rec update_loc (st : t) (loc : int * int) pce : t =
+(*[update_st_once st loc pce] is a helper that does the work for
+  [update_loc] - read the spec for [update_loc]. *)
+let rec update_st_once st loc pce =
   (* iterate through st and keep adding the elements to a new list - if
      st location value matches loc, then insert pce at that location and
      skip over the list *)
   match st with
   | [] -> []
   | (l, p) :: t ->
-      if l = loc then (l, pce) :: update_loc t loc pce
-      else (l, p) :: update_loc t loc pce
+      if l = loc then (l, pce) :: update_st_once t loc pce
+      else (l, p) :: update_st_once t loc pce
+
+let update_loc (st : t) (loc : int * int) pce : t =
+  let st_with_pce_moved = update_st_once st loc pce in
+  let ori_loc = get_position pce in
+  let fully_updated_st =
+    update_st_once st_with_pce_moved ori_loc (to_piece ori_loc "[ ]")
+  in
+  fully_updated_st
 
 (* ==================is_path_empty======================================== *)
 let verticle_move (loc1 : int * int) (loc2 : int * int) =
