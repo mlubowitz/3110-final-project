@@ -60,6 +60,16 @@ let update_loc (st : t) (loc : int * int) pce : t =
   in
   fully_updated_st
 
+(* =============st w/ only black queen; white king================== *)
+let st_with_two_pces pce_loc =
+  (* only leave white king and piece at loc l - for testing purposes *)
+  List.map
+    (fun x ->
+      let loc = fst x in
+      if loc = (7, 4) || loc = pce_loc then x
+      else (loc, to_piece loc "[ ]"))
+    (init_board () |> init_state)
+
 (* ==================is_path_empty======================================== *)
 let verticle_move (loc1 : int * int) (loc2 : int * int) =
   snd loc1 = snd loc2 && fst loc1 != fst loc2
