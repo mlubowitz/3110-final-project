@@ -55,3 +55,9 @@ val checkpath_list : t -> Pieces.piece -> (int * int) list
 
 val state_to_list : t -> ((int * int) * Pieces.piece) list
 (**[state_to_list t] is a list of the list given by t*)
+
+val st_with_two_pces : int * int -> t
+(**[st_with_two_pces loc] is a state with only the piece at location
+   [loc] and the white king at (7,4). All other spots on the board are
+   empty. This is used for testing in_check. The two pieces are in their
+   normal initial positions. *)
