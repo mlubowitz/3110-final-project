@@ -111,10 +111,10 @@ let update_st_castle st king_loc king_dest =
   let moved_king = what_piece st king_loc |> first_move in
   let moved_rook = what_piece st rook_loc |> first_move in
   let st = update_loc st king_dest moved_king in
-  let st = update_loc st rook_fin_loc moved_rook in
-  let st = update_loc st king_loc (to_piece king_loc "[ ]") in
-  let st = update_loc st rook_loc (to_piece rook_loc "[ ]") in
-  st
+  update_loc st rook_fin_loc moved_rook
+(* let st = update_loc st king_loc (to_piece king_loc "[ ]") in let st =
+   update_loc st rook_loc (to_piece rook_loc "[ ]") in *)
+
 (* ========================================================= *)
 
 let complete_castle brd st king_loc king_dest =
@@ -141,9 +141,8 @@ let complete_castle brd st king_loc king_dest =
 let update_st_norm_move st sel_pce_loc dest =
   (* Get the moved piece and mark it as having moved at least once. *)
   let moved_piece = what_piece st sel_pce_loc |> first_move in
-  let st = update_loc st dest moved_piece in
-  let st = update_loc st sel_pce_loc (to_piece sel_pce_loc "[ ]") in
-  st
+  update_loc st dest moved_piece
+(* let st = update_loc st sel_pce_loc (to_piece sel_pce_loc "[ ]") in *)
 
 (* ============================================================ *)
 
