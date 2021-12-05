@@ -4,8 +4,9 @@ open Board
 open Pieces
 open State
 
-let is_legal_test name ori_piece new_piece expected =
-  name >:: fun _ -> assert_equal expected (is_legal ori_piece new_piece)
+let is_legal_PIECES_test name ori_piece new_piece expected =
+  name >:: fun _ ->
+  assert_equal expected (is_legal_PIECES ori_piece new_piece)
 
 let empty_1_1 = to_piece (1, 1) "[ ]"
 
@@ -69,64 +70,77 @@ let knight_3_0 = to_piece (3, 0) "[n]"
 
 let knight_2_3 = to_piece (2, 3) "[n]"
 
-let is_legal_tests =
+let is_legal_PIECES_tests =
   [
-    is_legal_test "bishop from 4,4 to 1,1 is true" bishop_4_4 empty_1_1
-      true;
-    is_legal_test "bishop from 4,4 to 1,7 is true" bishop_4_4 empty_1_7
-      true;
-    is_legal_test "bishop from 4,4 to 6,6 is true" bishop_4_4 empty_6_6
-      true;
-    is_legal_test "bishop from 4,4 to 7,1 is true" bishop_4_4 empty_7_1
-      true;
-    is_legal_test "bishop from 4,4 to 6,1 is false" bishop_4_4 empty_6_1
-      false;
-    is_legal_test "rook from 1,0 to 1,1 is true" rook_1_0 empty_1_1 true;
-    is_legal_test "rook from 5,1 to 1,1 is true" rook_5_1 empty_1_1 true;
-    is_legal_test "rook from 0,1 to 1,1 is true" rook_0_1 empty_1_1 true;
-    is_legal_test "rook from 1,4 to 1,1 is true" rook_1_4 empty_1_1 true;
-    is_legal_test "rook from 1,4 to 6,6 is false" rook_1_4 empty_6_6
-      false;
-    is_legal_test "rook from 1,4 to same color bishop on 4,4 is false"
-      rook_1_4 bishop_4_4 false;
-    is_legal_test
+    is_legal_PIECES_test "bishop from 4,4 to 1,1 is true" bishop_4_4
+      empty_1_1 true;
+    is_legal_PIECES_test "bishop from 4,4 to 1,7 is true" bishop_4_4
+      empty_1_7 true;
+    is_legal_PIECES_test "bishop from 4,4 to 6,6 is true" bishop_4_4
+      empty_6_6 true;
+    is_legal_PIECES_test "bishop from 4,4 to 7,1 is true" bishop_4_4
+      empty_7_1 true;
+    is_legal_PIECES_test "bishop from 4,4 to 6,1 is false" bishop_4_4
+      empty_6_1 false;
+    is_legal_PIECES_test "rook from 1,0 to 1,1 is true" rook_1_0
+      empty_1_1 true;
+    is_legal_PIECES_test "rook from 5,1 to 1,1 is true" rook_5_1
+      empty_1_1 true;
+    is_legal_PIECES_test "rook from 0,1 to 1,1 is true" rook_0_1
+      empty_1_1 true;
+    is_legal_PIECES_test "rook from 1,4 to 1,1 is true" rook_1_4
+      empty_1_1 true;
+    is_legal_PIECES_test "rook from 1,4 to 6,6 is false" rook_1_4
+      empty_6_6 false;
+    is_legal_PIECES_test
+      "rook from 1,4 to same color bishop on 4,4 is false" rook_1_4
+      bishop_4_4 false;
+    is_legal_PIECES_test
       "rook from 1,4 to different color bishop on 4,4 is true" rook_1_4
       bishop_4_4_diff_color true;
-    is_legal_test "pawn from 3,1 to 1,1 is true" pawn_3_1_no_first_move
-      empty_1_1 true;
-    is_legal_test "pawn from 3,1 to 2,1 is true" pawn_3_1_no_first_move
-      empty_2_1 true;
-    is_legal_test "pawn from 3,1 to 1,7 is false" pawn_3_1_no_first_move
-      empty_1_7 false;
-    is_legal_test "pawn after moving from 3,1 to 1,1 is false"
+    is_legal_PIECES_test "pawn from 3,1 to 1,1 is true"
+      pawn_3_1_no_first_move empty_1_1 true;
+    is_legal_PIECES_test "pawn from 3,1 to 2,1 is true"
+      pawn_3_1_no_first_move empty_2_1 true;
+    is_legal_PIECES_test "pawn from 3,1 to 1,7 is false"
+      pawn_3_1_no_first_move empty_1_7 false;
+    is_legal_PIECES_test "pawn after moving from 3,1 to 1,1 is false"
       pawn_3_1_first_move empty_1_1 false;
-    is_legal_test "king from 5,6 to 6,6 is true" king_5_6 empty_6_6 true;
-    is_legal_test "king from 5,5 to 6,6 is true" king_5_5 empty_6_6 true;
-    is_legal_test "king from 6,5 to 6,6 is true" king_6_5 empty_6_6 true;
-    is_legal_test "king from 7,5 to 6,6 is true" king_7_5 empty_6_6 true;
-    is_legal_test "king from 7,6 to 6,6 is true" king_7_6 empty_6_6 true;
-    is_legal_test "king from 7,7 to 6,6 is true" king_7_7 empty_6_6 true;
-    is_legal_test "king from 6,7 to 6,6 is true" king_6_7 empty_6_6 true;
-    is_legal_test "king from 5,7 to 6,6 is true" king_5_7 empty_6_6 true;
-    is_legal_test "king from 5,6 to 7,1 is false" king_5_6 empty_7_1
-      false;
-    is_legal_test "knight from 4,5 to 6,6 is true" knight_4_5 empty_6_6
-      true;
-    is_legal_test "knight from 5,4 to 6,6 is true" knight_5_4 empty_6_6
-      true;
-    is_legal_test "knight from 7,4 to 6,6 is true" knight_7_4 empty_6_6
-      true;
-    is_legal_test "knight from 4,7 to 6,6 is true" knight_4_7 empty_6_6
-      true;
-    is_legal_test "knight from 3,2 to 1,1 is true" knight_3_2 empty_1_1
-      true;
-    is_legal_test "knight from 0,3 to 1,1 is true" knight_0_3 empty_1_1
-      true;
-    is_legal_test "knight from 3,0 to 1,1 is true" knight_3_0 empty_1_1
-      true;
-    is_legal_test "knight from 2,3 to 1,1 is true" knight_2_3 empty_1_1
-      true;
-    is_legal_test "knight from 2,3 to 6,6 is falses" knight_2_3
+    is_legal_PIECES_test "king from 5,6 to 6,6 is true" king_5_6
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 5,5 to 6,6 is true" king_5_5
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 6,5 to 6,6 is true" king_6_5
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 7,5 to 6,6 is true" king_7_5
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 7,6 to 6,6 is true" king_7_6
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 7,7 to 6,6 is true" king_7_7
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 6,7 to 6,6 is true" king_6_7
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 5,7 to 6,6 is true" king_5_7
+      empty_6_6 true;
+    is_legal_PIECES_test "king from 5,6 to 7,1 is false" king_5_6
+      empty_7_1 false;
+    is_legal_PIECES_test "knight from 4,5 to 6,6 is true" knight_4_5
+      empty_6_6 true;
+    is_legal_PIECES_test "knight from 5,4 to 6,6 is true" knight_5_4
+      empty_6_6 true;
+    is_legal_PIECES_test "knight from 7,4 to 6,6 is true" knight_7_4
+      empty_6_6 true;
+    is_legal_PIECES_test "knight from 4,7 to 6,6 is true" knight_4_7
+      empty_6_6 true;
+    is_legal_PIECES_test "knight from 3,2 to 1,1 is true" knight_3_2
+      empty_1_1 true;
+    is_legal_PIECES_test "knight from 0,3 to 1,1 is true" knight_0_3
+      empty_1_1 true;
+    is_legal_PIECES_test "knight from 3,0 to 1,1 is true" knight_3_0
+      empty_1_1 true;
+    is_legal_PIECES_test "knight from 2,3 to 1,1 is true" knight_2_3
+      empty_1_1 true;
+    is_legal_PIECES_test "knight from 2,3 to 6,6 is falses" knight_2_3
       empty_6_6 false;
   ]
 
@@ -641,7 +655,7 @@ let tests =
   "test suite for Chess"
   >::: List.flatten
          [
-           is_legal_tests;
+           is_legal_PIECES_tests;
            pieces_tests;
            board_tests;
            state_tests;

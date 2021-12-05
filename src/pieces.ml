@@ -19,6 +19,7 @@ type piece = {
   color : color;
   position : position;
   no_first_move : bool;
+  en_passant : bool;
 }
 
 let get_piece_type (p : piece) =
@@ -40,6 +41,8 @@ let get_color p =
   | White -> "W"
   | Black -> "B"
   | None -> "N"
+
+let get_en_passant p = p.en_passant
 
 let piece_picture (p : piece) =
   match (p.piece_type, p.color) with
@@ -69,6 +72,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[R]" ->
       {
@@ -76,6 +80,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[B]" ->
       {
@@ -83,6 +88,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[N]" ->
       {
@@ -90,6 +96,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[Q]" ->
       {
@@ -97,6 +104,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[K]" ->
       {
@@ -104,6 +112,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = Black;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[p]" ->
       {
@@ -111,6 +120,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[r]" ->
       {
@@ -118,6 +128,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[b]" ->
       {
@@ -125,6 +136,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[n]" ->
       {
@@ -132,6 +144,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[q]" ->
       {
@@ -139,6 +152,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | "[k]" ->
       {
@@ -146,6 +160,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = White;
         position = ori_loc;
         no_first_move = true;
+        en_passant = false;
       }
   | _ ->
       {
@@ -153,6 +168,7 @@ let to_piece (ori_loc : int * int) (n : string) : piece =
         color = None;
         position = ori_loc;
         no_first_move = false;
+        en_passant = false;
       }
 
 let pawn_legal_move (p : piece) (p2 : piece) =
@@ -162,8 +178,7 @@ let pawn_legal_move (p : piece) (p2 : piece) =
       && (newRow - initRow = -1
          || (newRow - initRow = -2 && p.no_first_move))
   | (initRow, initCol), (newRow, newCol), _ ->
-      newRow - initRow = -1
-      && (newCol - initCol = -1 || newCol - initCol = 1)
+      newRow - initRow = -1 && abs (newCol - initCol) = 1
 
 let rook_is_legal ori_loc new_loc =
   (fst new_loc <> fst ori_loc && snd new_loc = snd ori_loc)
@@ -187,7 +202,7 @@ let king_is_legal ori_loc new_loc =
 
 let id x = x
 
-let is_legal (p : piece) (p2 : piece) =
+let is_legal_PIECES (p : piece) (p2 : piece) =
   let a, b = get_position p2 in
   if a < 0 || a > 7 || b < 0 || b > 7 then false
   else if p.color = p2.color then false
@@ -209,6 +224,10 @@ let can_castle (p1 : piece) (p3 : piece) =
   else false
 
 let first_move (p : piece) = { p with no_first_move = false }
+
+let en_passant_true (p : piece) = { p with en_passant = true }
+
+let en_passant_false (p : piece) = { p with en_passant = false }
 
 let new_loc_piece (p : piece) (new_loc : int * int) =
   { p with position = new_loc }

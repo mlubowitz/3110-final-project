@@ -21,6 +21,8 @@ val update_loc : t -> int * int -> Pieces.piece -> t
     location [l], that piece is replaced by the new piece. The original
     location of piece [p] is set to an empty grid (None piece).*)
 
+val update_board : Board.t -> t -> int * int -> int * int -> Board.t
+
 val is_path_empty : t -> int * int -> int * int -> bool
 (**[is_path_empty st l1 l2] is true if path from location [l1] to [l2]
    on the chess board has no pieces, false otherwise. *)
@@ -61,3 +63,16 @@ val st_with_two_pces : int * int -> t
    [loc] and the white king at (7,4). All other spots on the board are
    empty. This is used for testing in_check. The two pieces are in their
    normal initial positions. *)
+
+val reset_en_passant : t -> string -> t
+(**[reset_en_passant st color] is st but with all the en_passant values
+   of the pieces of the color that did not just move set to false *)
+
+val update_en_passant : int * int -> Pieces.piece -> Pieces.piece
+(**[update_en_passant st color] is st but with all the en_passant values
+   of the pieces of the color that did not just move set to false *)
+
+val is_legal : t -> Pieces.piece -> Pieces.piece -> bool
+(** [is_legal st piece piece] is the legality of the movement of a given
+    piece [piece] from [ori_loc] to [new_loc]. Raises [Illegal s] if
+    there is no piece at [ori_loc]*)

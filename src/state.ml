@@ -52,7 +52,7 @@ let rec update_st_once st loc pce =
       if l = loc then (l, pce) :: update_st_once t loc pce
       else (l, p) :: update_st_once t loc pce
 
-let update_loc (st : t) (loc : int * int) pce : t =
+let update_loc_helper (st : t) (loc : int * int) pce : t =
   let st_with_pce_moved = update_st_once st loc pce in
   let ori_loc = get_position pce in
   let fully_updated_st =
@@ -69,6 +69,58 @@ let st_with_two_pces pce_loc =
       if loc = (7, 4) || loc = pce_loc then x
       else (loc, to_piece loc "[ ]"))
     (init_board () |> init_state)
+
+(* ==================update_en_passant================================ *)
+let update_en_passant (newloc : int * int) (p : piece) =
+  if
+    get_piece_type p = "P"
+    && abs (fst (get_position p) - fst newloc) = 2
+  then en_passant_true p
+  else p
+
+(* ==================en_passant_capture================================ *)
+let is_en_passant (st : t) (p : piece) (p2 : piece) =
+  match (get_position p, get_position p2, get_color p2) with
+  | (initRow, initCol), (newRow, newCol), "N" ->
+      newRow - initRow = -1
+      && abs (newCol - initCol) = 1
+      && get_en_passant (what_piece st (initRow, newCol))
+  | (initRow, initCol), (newRow, newCol), _ -> false
+
+let update_loc (st : t) (dest : int * int) (p : piece) =
+  let p2 = what_piece st dest in
+  if is_en_passant st p p2 then
+    let st =
+      update_loc_helper st
+        (fst (get_position p), snd (get_position p2))
+        p
+    in
+    update_loc_helper st (get_position p2) p
+  else update_loc_helper st (get_position p2) p
+
+let update_board brd st sel_pce_loc dest =
+  let p = what_piece st sel_pce_loc in
+  let p2 = what_piece st dest in
+  if is_en_passant st p p2 then
+    let capture =
+      move_piece brd sel_pce_loc (fst sel_pce_loc, snd dest)
+    in
+    move_piece capture (fst sel_pce_loc, snd dest) dest
+  else move_piece brd sel_pce_loc dest
+
+(* ==================reset_en_passant================================ *)
+let rec reset_helper color = function
+  | l, p ->
+      if color != get_color p then (l, en_passant_false p) else (l, p)
+
+let reset_en_passant st color = List.map (reset_helper color) st
+
+(* ==================is_legal================================ *)
+
+let is_legal (st : t) (p : piece) (p2 : piece) =
+  if is_legal_PIECES p p2 = true then true
+  else if get_piece_type p = "P" then is_en_passant st p p2
+  else false
 
 (* ==================is_path_empty======================================== *)
 let verticle_move (loc1 : int * int) (loc2 : int * int) =
@@ -365,35 +417,35 @@ let rec possible_moves t color = "unimplemented"
 
 let move_up1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst - 1, pSnd) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_down1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst + 1, pSnd) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_left1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst, pSnd - 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_right1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst, pSnd + 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_URdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst - 1, pSnd + 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_LRdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst + 1, pSnd + 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_ULdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst - 1, pSnd - 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let move_LLdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst + 1, pSnd - 1) in
-  is_legal p1 p2 && in_check st p2 = false
+  is_legal st p1 p2 && in_check st p2 = false
 
 let can_not_knight_move (st : t) (p1 : piece) =
   let pFst, pSnd = get_position p1 in
@@ -408,14 +460,14 @@ let can_not_knight_move (st : t) (p1 : piece) =
 
 let can_knight_move (st : t) (knight : piece) =
   let a, b = get_position knight in
-  is_legal knight (what_piece st (a - 2, b - 1))
-  || is_legal knight (what_piece st (a - 2, b + 1))
-  || is_legal knight (what_piece st (a - 1, b - 2))
-  || is_legal knight (what_piece st (a - 1, b + 2))
-  || is_legal knight (what_piece st (a + 1, b - 2))
-  || is_legal knight (what_piece st (a + 1, b + 2))
-  || is_legal knight (what_piece st (a + 2, b - 1))
-  || is_legal knight (what_piece st (a + 2, b + 1))
+  is_legal st knight (what_piece st (a - 2, b - 1))
+  || is_legal st knight (what_piece st (a - 2, b + 1))
+  || is_legal st knight (what_piece st (a - 1, b - 2))
+  || is_legal st knight (what_piece st (a - 1, b + 2))
+  || is_legal st knight (what_piece st (a + 1, b - 2))
+  || is_legal st knight (what_piece st (a + 1, b + 2))
+  || is_legal st knight (what_piece st (a + 2, b - 1))
+  || is_legal st knight (what_piece st (a + 2, b + 1))
 
 let can_piece_move (st : t) (p : piece) =
   if get_piece_type p != "N" then can_not_knight_move st p
@@ -485,14 +537,14 @@ let white_alphanum_num (input : string) =
 let black_alphanum_num (input : string) =
   let num = input.[1] |> Char.escaped |> int_of_string in
   match input.[0] with
-  | 'a' -> (8 - num, 0)
-  | 'b' -> (8 - num, 1)
-  | 'c' -> (8 - num, 2)
-  | 'd' -> (8 - num, 3)
-  | 'e' -> (8 - num, 4)
-  | 'f' -> (8 - num, 5)
-  | 'g' -> (8 - num, 6)
-  | 'h' -> (8 - num, 7)
+  | 'a' -> (num - 1, 7)
+  | 'b' -> (num - 1, 6)
+  | 'c' -> (num - 1, 5)
+  | 'd' -> (num - 1, 4)
+  | 'e' -> (num - 1, 3)
+  | 'f' -> (num - 1, 2)
+  | 'g' -> (num - 1, 1)
+  | 'h' -> (num - 1, 0)
   | _ -> failwith "not possible"
 
 (*"alpha numeric" ==> (numeric - 1, alpha) *)

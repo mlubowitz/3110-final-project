@@ -140,14 +140,16 @@ let complete_castle brd st king_loc king_dest =
 
 let update_st_norm_move st sel_pce_loc dest =
   (* Get the moved piece and mark it as having moved at least once. *)
-  let moved_piece = what_piece st sel_pce_loc |> first_move in
+  let moved_piece =
+    what_piece st sel_pce_loc |> first_move |> update_en_passant dest
+  in
   update_loc st dest moved_piece
 (* let st = update_loc st sel_pce_loc (to_piece sel_pce_loc "[ ]") in *)
 
 (* ============================================================ *)
 
 let normal_move brd st sel_pce_loc dest =
-  let new_brd = move_piece brd sel_pce_loc dest in
+  let new_brd = update_board brd st sel_pce_loc dest in
   let new_st = update_st_norm_move st sel_pce_loc dest in
   [ Board new_brd; State new_st ]
 
@@ -224,7 +226,7 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
   | true -> check_in_check brd state sel_pce_loc dest true
   | false -> (
       match
-        is_legal selected_piece pce_on_dest
+        is_legal state selected_piece pce_on_dest
         && is_path_empty state sel_pce_loc dest
       with
       | true -> check_in_check brd state sel_pce_loc dest false
@@ -350,7 +352,9 @@ let rec play_game brd st =
      CHECKMATE, THEN THE GAME WOULD STOP AND A WINNER WOULD BE PRINTED
      OUT AT THIS POINT. *)
   let brd = flip brd in
-  let st = flip_state st in
+  let st =
+    reset_en_passant st (get_color (what_piece st dest)) |> flip_state
+  in
   let () = print_endline "" in
   let () = print_endline "Next player - board flipped: " in
   let () = print_board brd in
@@ -409,7 +413,7 @@ let rec possible_move_exists
         match pos_lst with
         | [] -> possible_move_exists state t color pos_lst
         | k :: m ->
-            if is_legal (what_piece state k) p then
+            if is_legal state (what_piece state k) p then
               let st_w_move = update_st_norm_move state l k in
               let is_in_check =
                 in_check st_w_move

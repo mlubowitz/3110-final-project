@@ -14,6 +14,9 @@ val get_piece_type : piece -> string
 val get_position : piece -> int * int
 (** [get_position p] is the position of piece [p]*)
 
+val get_en_passant : piece -> bool
+(** [get_en_passant p] is the en_passant value of piece [p]*)
+
 val is_piece : piece -> bool
 (** [is_king p] is [true] if [p] is a piece and [false] otherise*)
 
@@ -21,14 +24,23 @@ val to_piece : int * int -> string -> piece
 (** [to_piece s] is the conversion of a piece on the matrix to a piece
     type.*)
 
-val is_legal : piece -> piece -> bool
-(** [is_legal piece ori_loc new_loc] is the legality of the movement of
-    a given piece [piece] from [ori_loc] to [new_loc]. Raises
-    [Illegal s] if there is no piece at [ori_loc]*)
+val is_legal_PIECES : piece -> piece -> bool
+(** [is_legal_PIECES piece piece] is the legality of the movement of a
+    given piece [piece] from [ori_loc] to [new_loc]. Raises [Illegal s]
+    if there is no piece at [ori_loc]. Exception: doesn't handle en
+    passant*)
 
 val first_move : piece -> piece
 (** [first_move p] is the same piece as [p] but with no_first_move set
     to false.*)
+
+val en_passant_true : piece -> piece
+(** [en_passant_true p] is the same piece as [p] but with en_passant set
+    to true.*)
+
+val en_passant_false : piece -> piece
+(** [en_passant_false p] is the same piece as [p] but with en_passant
+    set to false.*)
 
 val new_loc_piece : piece -> int * int -> piece
 (** [new_loc_piece p new_loc] is the same piece as [p] but with position
