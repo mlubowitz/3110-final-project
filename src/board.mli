@@ -39,3 +39,7 @@ val get_row : t -> int -> string list
 (**[get_row b r] is a list of the pieces (represented as strings) of row
    [r] in board [b] in the order that they appear in [r] (left to
    right).*)
+
+val promote_piece : t -> grid -> grid -> string -> t
+(**[promote_piece board ori_loc new_loc piece_type] is the new board
+   setup if a pawn is promoted to type [piece_type]*)

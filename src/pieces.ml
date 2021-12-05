@@ -253,5 +253,11 @@ let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
 let knight_check_piece (p : piece) (p2 : piece) =
   if p.color != p2.color && p2.piece_type = Knight then p2 else p
 
-let en_passant (p : piece) =
-  if p.piece_type = Pawn && fst p.position = 0 then true else false
+let promotion_change (p : piece) (s : string) : piece =
+  match s with
+  | "P" -> { p with piece_type = Pawn }
+  | "N" -> { p with piece_type = Knight }
+  | "B" -> { p with piece_type = Bishop }
+  | "R" -> { p with piece_type = Rook }
+  | "Q" -> { p with piece_type = Queen }
+  | _ -> failwith "not possible"

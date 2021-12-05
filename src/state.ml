@@ -87,6 +87,60 @@ let is_en_passant (st : t) (p : piece) (p2 : piece) =
       && get_en_passant (what_piece st (initRow, newCol))
   | (initRow, initCol), (newRow, newCol), _ -> false
 
+(* ==================promotion======================================== *)
+let promotion (st : t) (p : piece) (pdest : int * int) =
+  get_piece_type p = "P" && fst pdest = 0
+
+let rec promotion_piece p =
+  let () =
+    print_endline "";
+    print_endline
+      "Pawn promotion: choose a replacement inputing as a string 'P' \n\
+      \         for pawn, 'N' Knight, 'B' for bishop, 'R' for Rook, or \
+       'Q' for Queen";
+    print_string ">"
+  in
+  let input = read_line () in
+  let () = print_endline ("your input was" ^ input) in
+  match input with
+  | "P"
+  | "K"
+  | "B"
+  | "R"
+  | "Q" ->
+      promotion_change p input
+  | x ->
+      let () =
+        print_endline
+          "Not a piece. Input location of piece you want to select.";
+        print_string ">"
+      in
+      promotion_piece p
+
+(* ==================update_board================================ *)
+let update_board
+    brd
+    st
+    sel_pce_loc
+    dest
+    (prmtion : bool)
+    (enpsnt : bool) =
+  if enpsnt then
+    let capture =
+      move_piece brd sel_pce_loc (fst sel_pce_loc, snd dest)
+    in
+    move_piece capture (fst sel_pce_loc, snd dest) dest
+  else if prmtion then
+    let piece = what_piece st dest in
+    let piece_type = get_piece_type piece in
+    let () = print_endline piece_type in
+    if get_color piece = "W" then
+      let piece_type = String.lowercase_ascii piece_type in
+      promote_piece brd sel_pce_loc dest piece_type
+    else promote_piece brd sel_pce_loc dest piece_type
+  else move_piece brd sel_pce_loc dest
+
+(* ==================update_loc================================ *)
 let update_loc (st : t) (dest : int * int) (p : piece) =
   let p2 = what_piece st dest in
   if is_en_passant st p p2 then
@@ -96,17 +150,9 @@ let update_loc (st : t) (dest : int * int) (p : piece) =
         p
     in
     update_loc_helper st (get_position p2) p
+  else if promotion st p dest then
+    update_loc_helper st dest (promotion_piece p)
   else update_loc_helper st (get_position p2) p
-
-let update_board brd st sel_pce_loc dest =
-  let p = what_piece st sel_pce_loc in
-  let p2 = what_piece st dest in
-  if is_en_passant st p p2 then
-    let capture =
-      move_piece brd sel_pce_loc (fst sel_pce_loc, snd dest)
-    in
-    move_piece capture (fst sel_pce_loc, snd dest) dest
-  else move_piece brd sel_pce_loc dest
 
 (* ==================reset_en_passant================================ *)
 let rec reset_helper color = function
@@ -405,10 +451,6 @@ let rec find_king t color =
   | (l, p) :: t ->
       if get_piece_type p = "K" && color = get_color p then l
       else find_king t color
-
-(* ==================promotion======================================== *)
-let promotion (st : t) (p : piece) (pdest : int * int) =
-  get_piece_type p = "P" && fst pdest = 0
 
 (* ==================possible_moves======================================== *)
 let rec possible_moves t color = "unimplemented"

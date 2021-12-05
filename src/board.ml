@@ -123,3 +123,12 @@ let get_row board row =
     | x -> board.(row).(x) :: make_lst (x + 1)
   in
   make_lst 0
+
+let promote_piece board ori_loc new_loc (piece_type : string) =
+  let n_row = fst new_loc in
+  let n_col = snd new_loc in
+  let ori_row = fst ori_loc in
+  let ori_col = snd ori_loc in
+  let () = board.(n_row).(n_col) <- "[" ^ piece_type ^ "]" in
+  let () = board.(ori_row).(ori_col) <- "[ ]" in
+  Array.copy board

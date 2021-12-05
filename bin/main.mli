@@ -10,7 +10,7 @@ type updateinfo =
 
 val main : unit -> unit
 
-val play_game : Chess.Board.t -> Chess.State.t -> unit
+val play_game : Chess.Board.t -> Chess.State.t -> string -> unit
 (** [keep_playing] is y or no depending on if player wants to play. If
     player doesn't input y or n, this function keeps asking for y or n. *)
 

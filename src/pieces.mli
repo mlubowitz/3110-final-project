@@ -18,7 +18,7 @@ val get_en_passant : piece -> bool
 (** [get_en_passant p] is the en_passant value of piece [p]*)
 
 val is_piece : piece -> bool
-(** [is_king p] is [true] if [p] is a piece and [false] otherise*)
+(** [is_piece p] is [true] if [p] is not [None] and [false] otherise*)
 
 val to_piece : int * int -> string -> piece
 (** [to_piece s] is the conversion of a piece on the matrix to a piece
@@ -62,3 +62,6 @@ val knight_check_piece : piece -> piece -> piece
 val get_color : piece -> string
 (** [get_color p] is either "W", "B", or "N" (no color) depending on the
     color of piece [p] . *)
+
+val promotion_change : piece -> string -> piece
+(**[promtion_change]*)

@@ -5,6 +5,8 @@ open Pieces
 
 type location = int * int
 
+type player_turn = string
+
 type updateinfo =
   | Location of location
   | Castle of bool
@@ -148,9 +150,15 @@ let update_st_norm_move st sel_pce_loc dest =
 
 (* ============================================================ *)
 
-let normal_move brd st sel_pce_loc dest =
-  let new_brd = update_board brd st sel_pce_loc dest in
+let rec normal_move brd st sel_pce_loc dest =
+  let p = what_piece st sel_pce_loc in
+  let p2 = what_piece st dest in
+  let prmtion = promotion st p dest in
+  let enpsnt = is_en_passant st p p2 in
   let new_st = update_st_norm_move st sel_pce_loc dest in
+  let new_brd =
+    update_board brd new_st sel_pce_loc dest prmtion enpsnt
+  in
   [ Board new_brd; State new_st ]
 
 (* ======================================================== *)
@@ -289,13 +297,57 @@ let rec get_input_dest brd st =
      location.*)
   get_dest brd st sel_pce_loc
 
+let rec first_move (t : ((int * int) * piece) list) = true
+
+let rec possible_move_exists
+    (state : State.t)
+    t
+    color
+    (pos_lst : (int * int) list) =
+  match t with
+  | [] -> false
+  | (l, p) :: t ->
+      if color = get_color p then
+        match pos_lst with
+        | [] -> possible_move_exists state t color pos_lst
+        | k :: m ->
+            if is_legal state (what_piece state k) p then
+              let st_w_move = update_st_norm_move state l k in
+              let is_in_check =
+                in_check st_w_move
+                  (find_king st_w_move color |> what_piece st_w_move)
+              in
+              if is_in_check then
+                possible_move_exists state t color pos_lst
+              else true
+            else possible_move_exists state t color pos_lst
+      else possible_move_exists state t color pos_lst
+
+(* If the king is in check, given the color and state this determines if
+   that check is checkamte*)
+let checkmate (st : t) color =
+  let king = what_piece st (find_king st color) in
+  if can_piece_move st king then false
+  else
+    let pos_list = checkpath_list st king in
+    let t = state_to_list st in
+    possible_move_exists st t color pos_list
+
+let stalemate (st : t) color =
+  let t = state_to_list st in
+  let locs = List.map (fun x -> fst x) t in
+  possible_move_exists st t color locs
+
+let update_player_turn player_turn =
+  if player_turn = "W" then "B" else "W"
+
 (* ================================================================== *)
 (* =======================END HELPER FUNCTIONS======================= *)
 (* ================================================================== *)
 (* ================================================================== *)
 
 (* THE MAIN FUNCTION FOR GAMEPLAY. *)
-let rec play_game brd st =
+let rec play_game brd st player_turn =
   let () = print_endline "Current board:" in
   let () = print_board brd in
 
@@ -359,12 +411,15 @@ let rec play_game brd st =
   let () = print_endline "Next player - board flipped: " in
   let () = print_board brd in
 
+  let player_turn = update_player_turn player_turn in
+
   let () =
     print_endline "";
     print_endline "Keep playing? y or n"
   in
   let keep_play = keep_playing () in
-  if keep_play = "y" then play_game brd st else print_endline "Goodbye!"
+  if keep_play = "y" then play_game brd st player_turn
+  else print_endline "Goodbye!"
 
 (* ================================================================== *)
 
@@ -373,7 +428,8 @@ let main () =
     "\n\nWelcome to Chess.\n";
   let board = init_board () in
   let st = init_state board in
-  play_game board st
+  let player_turn = "W" in
+  play_game board st player_turn
 
 (* Starts game. *)
 let () = main ()
@@ -396,46 +452,6 @@ let is_castle state (p : piece) (p2 : piece) =
     in_check state (what_piece state (7, 3 + ((p2Snd - pSnd) / 2)))
     = false
 
-let en_passant state (p : piece) (p2 : piece) = "unimplemented"
-
 (*Helper function for checkmate and stalemate. Checks every piece of the
   person who's turn it is color to see if they can move without causing
   the king to be in check*)
-let rec possible_move_exists
-    (state : State.t)
-    t
-    color
-    (pos_lst : (int * int) list) =
-  match t with
-  | [] -> false
-  | (l, p) :: t ->
-      if color = get_color p then
-        match pos_lst with
-        | [] -> possible_move_exists state t color pos_lst
-        | k :: m ->
-            if is_legal state (what_piece state k) p then
-              let st_w_move = update_st_norm_move state l k in
-              let is_in_check =
-                in_check st_w_move
-                  (find_king st_w_move color |> what_piece st_w_move)
-              in
-              if is_in_check then
-                possible_move_exists state t color pos_lst
-              else true
-            else possible_move_exists state t color pos_lst
-      else possible_move_exists state t color pos_lst
-
-(* If the king is in check, given the color and state this determines if
-   that check is checkamte*)
-let checkmate (st : t) color =
-  let king = what_piece st (find_king st color) in
-  if can_piece_move st king then false
-  else
-    let pos_list = checkpath_list st king in
-    let t = state_to_list st in
-    possible_move_exists st t color pos_list
-
-let stalemate (st : t) color =
-  let t = state_to_list st in
-  let locs = List.map (fun x -> fst x) t in
-  possible_move_exists st t color locs
