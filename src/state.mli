@@ -50,7 +50,7 @@ val find_king : t -> string -> int * int
 (** [fing_king st c] is the location of the king with color [c] in state
     [st]. Colors are "W", "B", or "N" (no color).*)
 
-val can_piece_move : t -> Pieces.piece -> bool
+val can_king_move : t -> Pieces.piece -> bool
 (**[can_piece_move st p] is true if a piece has any legal moves on the
    board*)
 
@@ -80,3 +80,8 @@ val is_legal : t -> Pieces.piece -> Pieces.piece -> bool
 (** [is_legal st piece piece] is the legality of the movement of a given
     piece [piece] from [ori_loc] to [new_loc]. Raises [Illegal s] if
     there is no piece at [ori_loc]*)
+
+val insufficient_material : t -> bool
+(**[insufficient_material st] is true if the pieces on the board are not
+   sufficient for either player to achieve a checkmate, thus it is a
+   stalemate*)

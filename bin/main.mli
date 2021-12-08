@@ -10,20 +10,22 @@ type updateinfo =
 
 val main : unit -> unit
 
-val play_game : Chess.Board.t -> Chess.State.t -> string -> unit
+val play_game :
+  Chess.Board.t -> Chess.State.t -> string -> Chess.Board.t list -> unit
 (** [keep_playing] is y or no depending on if player wants to play. If
     player doesn't input y or n, this function keeps asking for y or n. *)
 
-val get_input_dest : Chess.Board.t -> Chess.State.t -> updateinfo list
+val get_input_dest :
+  Chess.Board.t -> Chess.State.t -> string -> updateinfo list
 (** [get_input_dest brd st] contains the location of the selected piece,
     the dest location, and a bool for whether or not the move between
     these locations is castling.*)
 
-val select_piece : Chess.State.t -> location
+val select_piece : Chess.State.t -> string -> location
 (** [select_piece st] prompts player to select piece and calls helper to
     enable piece selection. Helepr to [get_input_dest]. *)
 
-val get_sel_pce_loc : Chess.State.t -> location
+val get_sel_pce_loc : Chess.State.t -> string -> location
 (**[get_sel_pce_loc state] is the location of the piece that the player
    wants to select. If player selects a location without a piece or
    invalid location, this function keeps asking for a board location
@@ -31,12 +33,20 @@ val get_sel_pce_loc : Chess.State.t -> location
    select_piece. *)
 
 val get_dest :
-  Chess.Board.t -> Chess.State.t -> location -> updateinfo list
+  Chess.Board.t ->
+  Chess.State.t ->
+  location ->
+  string ->
+  updateinfo list
 (**[get_dest brd state loc] prompts for destination location and calls
    [get_dest_loc]. *)
 
 val get_dest_loc :
-  Chess.Board.t -> Chess.State.t -> location -> updateinfo list
+  Chess.Board.t ->
+  Chess.State.t ->
+  location ->
+  string ->
+  updateinfo list
 (** [get_dest_loc brd st sel_loc] gets user input for the dest location.
     If user inputs “reselect,” then call [select_piece] to reselect the
     piece to move. If not, then call [chk_castl_and_legl] to check if
@@ -46,6 +56,7 @@ val chk_castl_and_legl :
   Chess.Board.t ->
   Chess.State.t ->
   location ->
+  string ->
   string ->
   updateinfo list
 (** [chk_castl_and_legl brd st sel_loc dest_inpt] determines if input
@@ -59,6 +70,7 @@ val check_in_check :
   location ->
   location ->
   bool ->
+  string ->
   updateinfo list
 (** [check_in_check is ] checks if the move would put the current
     player's king in check. If so, it asks for a new dest location.

@@ -5,8 +5,6 @@ open Pieces
 
 type location = int * int
 
-type player_turn = string
-
 type updateinfo =
   | Location of location
   | Castle of bool
@@ -48,43 +46,6 @@ let rec keep_playing () =
   | x ->
       let () = print_endline "Please type y or n" in
       keep_playing ()
-
-(* ======================================================= *)
-
-let rec get_sel_pce_loc state =
-  let input = read_line () |> str_to_grid in
-  match what_piece state input with
-  | exception InvalidLocation e ->
-      let () =
-        print_endline
-          "Not valid board location. Input another location.";
-        print_string ">"
-      in
-      get_sel_pce_loc state
-  | p -> (
-      let piece = p in
-      match is_piece piece with
-      | true -> input
-      | false ->
-          let () =
-            print_endline
-              "Not a piece. Input location of piece you want to select.";
-            print_string ">"
-          in
-          get_sel_pce_loc state)
-
-(* ================================================================== *)
-
-let select_piece st =
-  let () =
-    print_endline "";
-    print_endline
-      "Select piece you want to move by inputting its location in \
-       EXACT format (row,column). Upper left is (0,0) and bottom right \
-       is (7,7). NO SPACES!";
-    print_string ">"
-  in
-  get_sel_pce_loc st
 
 (* ================================================================== *)
 
@@ -148,6 +109,110 @@ let update_st_norm_move st sel_pce_loc dest =
   update_loc st dest moved_piece
 (* let st = update_loc st sel_pce_loc (to_piece sel_pce_loc "[ ]") in *)
 
+(* ======================================================= *)
+
+let rec possible_moves_list_acc
+    (state : State.t)
+    (pieces : ((int * int) * piece) list)
+    color
+    (destinations : (int * int) list)
+    (acc : (int * int) list) =
+  if destinations = [] then acc
+  else
+    match pieces with
+    | [] -> acc
+    | (l, p) :: t ->
+        let unChecked = destinations in
+        check_all_dests state l p t color destinations unChecked acc
+
+and check_all_dests state l p t color destinations unChecked acc =
+  if color = get_color p then
+    match unChecked with
+    | [] -> possible_moves_list_acc state t color destinations acc
+    | k :: m ->
+        if is_legal state (what_piece state k) p then
+          let st_w_move = update_st_norm_move state l k in
+          let is_in_check =
+            in_check st_w_move
+              (find_king st_w_move color |> what_piece st_w_move)
+          in
+          if is_in_check then
+            check_all_dests state l p t color destinations m acc
+          else
+            check_all_dests state l p t color destinations m (k :: acc)
+        else check_all_dests state l p t color destinations m acc
+  else possible_moves_list_acc state t color destinations acc
+
+(*[possible_moves_list st pieces color destinations] creates a list of
+  all the locations on the board, [destinations], to which pieces on the
+  board in list [pieces] of the given [color] can move*)
+let possible_moves_list st pieces color destinations =
+  possible_moves_list_acc st pieces color destinations []
+
+(* If the king is in check, given the color and state this determines if
+   that check is checkamte*)
+let checkmate (st : t) color =
+  let king = what_piece st (find_king st color) in
+  if can_king_move st king then false
+  else
+    let pos_list = checkpath_list st king in
+    let t = state_to_list st in
+    possible_moves_list st t color pos_list = []
+
+let stalemate (st : t) color =
+  let t = state_to_list st in
+  let locs = List.map (fun x -> fst x) t in
+  possible_moves_list st t color locs = []
+
+let piece_possible_moves (st : t) (p : piece) =
+  let t = state_to_list st in
+  let locs = List.map (fun x -> fst x) t in
+  let piece = (get_position p, p) in
+  let color = get_color p in
+  possible_moves_list st [ piece ] color locs
+
+(* ======================================================= *)
+
+let rec get_sel_pce_loc state player_turn =
+  let input = read_line () |> str_to_grid in
+  match what_piece state input with
+  | exception InvalidLocation e ->
+      let () =
+        print_endline
+          "Not valid board location. Input another location.";
+        print_string ">"
+      in
+      get_sel_pce_loc state player_turn
+  | p -> (
+      let piece = p in
+      match
+        is_piece piece
+        && get_color piece = player_turn
+        && piece_possible_moves state piece != []
+      with
+      | true -> input
+      | false ->
+          let () =
+            print_endline
+              "Not a valid piece. Input location of piece you want to \
+               select.";
+            print_string ">"
+          in
+          get_sel_pce_loc state player_turn)
+
+(* ================================================================== *)
+
+let select_piece st player_turn =
+  let () =
+    print_endline "";
+    print_endline
+      "Select piece you want to move by inputting its location in \
+       EXACT format (row,column). Upper left is (0,0) and bottom right \
+       is (7,7). NO SPACES!";
+    print_string ">"
+  in
+  get_sel_pce_loc st player_turn
+
 (* ============================================================ *)
 
 let rec normal_move brd st sel_pce_loc dest =
@@ -193,12 +258,12 @@ let rec get_pce_on_dest state dest =
 
 (* =================================================== *)
 
-let rec get_dest_loc brd state sel_pce_loc =
+let rec get_dest_loc brd state sel_pce_loc player_turn =
   let dest = read_line () in
   match dest with
   | "reselect"
   | "'reselect'" ->
-      let new_pce = select_piece state in
+      let new_pce = select_piece state player_turn in
       let () =
         print_endline "";
         print_endline
@@ -213,12 +278,12 @@ let rec get_dest_loc brd state sel_pce_loc =
            Or type 'reselect' to select a different piece.";
         print_string ">"
       in
-      get_dest_loc brd state new_pce
-  | x -> chk_castl_and_legl brd state sel_pce_loc x
+      get_dest_loc brd state new_pce player_turn
+  | x -> chk_castl_and_legl brd state sel_pce_loc x player_turn
 
 (* =======MUTUAL RECURSION=================== *)
 
-and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
+and chk_castl_and_legl brd state sel_pce_loc dest_inpt player_turn =
   let dest = dest_inpt |> str_to_grid in
   let selected_piece = what_piece state sel_pce_loc in
   let pce_on_dest = get_pce_on_dest state dest in
@@ -231,13 +296,14 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
     selected_piece |> get_piece_type = "K"
     && castle_allowed state sel_pce_loc dest
   with
-  | true -> check_in_check brd state sel_pce_loc dest true
+  | true -> check_in_check brd state sel_pce_loc dest true player_turn
   | false -> (
       match
         is_legal state selected_piece pce_on_dest
         && is_path_empty state sel_pce_loc dest
       with
-      | true -> check_in_check brd state sel_pce_loc dest false
+      | true ->
+          check_in_check brd state sel_pce_loc dest false player_turn
       | false ->
           let () =
             print_endline
@@ -245,11 +311,11 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt =
                new destination location or type 'reselect'.";
             print_string ">"
           in
-          get_dest_loc brd state sel_pce_loc)
+          get_dest_loc brd state sel_pce_loc player_turn)
 
 (* =======MUTUAL RECURSION=================== *)
 
-and check_in_check brd st sel_pce_loc dest castle =
+and check_in_check brd st sel_pce_loc dest castle player_turn =
   let player_color = what_piece st sel_pce_loc |> get_color in
   let st_w_move =
     if castle then update_st_castle st sel_pce_loc dest
@@ -266,12 +332,12 @@ and check_in_check brd st sel_pce_loc dest castle =
          destination location or 'reselect' piece.";
       print_string ">"
     in
-    get_dest_loc brd st sel_pce_loc
+    get_dest_loc brd st sel_pce_loc player_turn
   else [ Location sel_pce_loc; Location dest; Castle castle ]
 
 (* ============================================================ *)
 
-let get_dest brd state sel_pce_loc =
+let get_dest brd state sel_pce_loc player_turn =
   let () =
     print_endline "";
     print_endline
@@ -286,57 +352,18 @@ let get_dest brd state sel_pce_loc =
     print_endline "Or type 'reselect' to select a different piece.";
     print_string ">"
   in
-  get_dest_loc brd state sel_pce_loc
+  get_dest_loc brd state sel_pce_loc player_turn
 
 (* ===================================================== *)
 
-let rec get_input_dest brd st =
-  let sel_pce_loc = select_piece st in
+let rec get_input_dest brd st player_turn =
+  let sel_pce_loc = select_piece st player_turn in
 
   (* Get the destination location and return a list with it and starting
      location.*)
-  get_dest brd st sel_pce_loc
+  get_dest brd st sel_pce_loc player_turn
 
-let rec first_move (t : ((int * int) * piece) list) = true
-
-let rec possible_move_exists
-    (state : State.t)
-    t
-    color
-    (pos_lst : (int * int) list) =
-  match t with
-  | [] -> false
-  | (l, p) :: t ->
-      if color = get_color p then
-        match pos_lst with
-        | [] -> possible_move_exists state t color pos_lst
-        | k :: m ->
-            if is_legal state (what_piece state k) p then
-              let st_w_move = update_st_norm_move state l k in
-              let is_in_check =
-                in_check st_w_move
-                  (find_king st_w_move color |> what_piece st_w_move)
-              in
-              if is_in_check then
-                possible_move_exists state t color pos_lst
-              else true
-            else possible_move_exists state t color pos_lst
-      else possible_move_exists state t color pos_lst
-
-(* If the king is in check, given the color and state this determines if
-   that check is checkamte*)
-let checkmate (st : t) color =
-  let king = what_piece st (find_king st color) in
-  if can_piece_move st king then false
-  else
-    let pos_list = checkpath_list st king in
-    let t = state_to_list st in
-    possible_move_exists st t color pos_list
-
-let stalemate (st : t) color =
-  let t = state_to_list st in
-  let locs = List.map (fun x -> fst x) t in
-  possible_move_exists st t color locs
+(* ===================================================== *)
 
 let update_player_turn player_turn =
   if player_turn = "W" then "B" else "W"
@@ -347,12 +374,12 @@ let update_player_turn player_turn =
 (* ================================================================== *)
 
 (* THE MAIN FUNCTION FOR GAMEPLAY. *)
-let rec play_game brd st player_turn =
+let rec play_game brd st player_turn all_boards =
   let () = print_endline "Current board:" in
   let () = print_board brd in
 
   (* Get [starting loc; dest loc; castle?] in list form *)
-  let input_dest = get_input_dest brd st in
+  let input_dest = get_input_dest brd st player_turn in
 
   (* Get starting position out of list *)
   let select_pce_loc =
@@ -390,6 +417,8 @@ let rec play_game brd st player_turn =
     | _ -> failwith "This should never be reached."
   in
 
+  let all_boards = brd :: all_boards in
+
   (* Extract updated state from list. *)
   let st =
     match updated_game |> List.tl |> List.hd with
@@ -413,13 +442,19 @@ let rec play_game brd st player_turn =
 
   let player_turn = update_player_turn player_turn in
 
-  let () =
-    print_endline "";
-    print_endline "Keep playing? y or n"
-  in
-  let keep_play = keep_playing () in
-  if keep_play = "y" then play_game brd st player_turn
-  else print_endline "Goodbye!"
+  if checkmate st player_turn then
+    if player_turn = "W" then print_endline "Checkmate! Black Wins"
+    else print_endline "Checkmate! White Wins"
+  else if stalemate st player_turn || insufficient_material st then
+    print_endline "Game Over. Stalemate."
+  else
+    let () =
+      print_endline "";
+      print_endline "Keep playing? y or n"
+    in
+    let keep_play = keep_playing () in
+    if keep_play = "y" then play_game brd st player_turn all_boards
+    else print_endline "Goodbye!"
 
 (* ================================================================== *)
 
@@ -429,7 +464,8 @@ let main () =
   let board = init_board () in
   let st = init_state board in
   let player_turn = "W" in
-  play_game board st player_turn
+  let all_boards : Board.t list = [] in
+  play_game board st player_turn all_boards
 
 (* Starts game. *)
 let () = main ()

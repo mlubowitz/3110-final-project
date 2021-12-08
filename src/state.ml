@@ -489,7 +489,7 @@ let move_LLdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
   let p2 = what_piece st (pFst + 1, pSnd - 1) in
   is_legal st p1 p2 && in_check st p2 = false
 
-let can_not_knight_move (st : t) (p1 : piece) =
+let can_king_move (st : t) (p1 : piece) =
   let pFst, pSnd = get_position p1 in
   move_up1_helper st p1 pFst pSnd
   || move_down1_helper st p1 pFst pSnd
@@ -499,29 +499,6 @@ let can_not_knight_move (st : t) (p1 : piece) =
   || move_LRdiag_helper st p1 pFst pSnd
   || move_ULdiag_helper st p1 pFst pSnd
   || move_LLdiag_helper st p1 pFst pSnd
-
-let can_knight_move (st : t) (knight : piece) =
-  let a, b = get_position knight in
-  is_legal st knight (what_piece st (a - 2, b - 1))
-  || is_legal st knight (what_piece st (a - 2, b + 1))
-  || is_legal st knight (what_piece st (a - 1, b - 2))
-  || is_legal st knight (what_piece st (a - 1, b + 2))
-  || is_legal st knight (what_piece st (a + 1, b - 2))
-  || is_legal st knight (what_piece st (a + 1, b + 2))
-  || is_legal st knight (what_piece st (a + 2, b - 1))
-  || is_legal st knight (what_piece st (a + 2, b + 1))
-
-let can_piece_move (st : t) (p : piece) =
-  if get_piece_type p != "N" then can_not_knight_move st p
-  else can_knight_move st p
-
-let rec stalemate t color =
-  match t with
-  | [] -> true
-  | (l, p) :: t ->
-      if color = get_color p && can_piece_move t p then false
-      else stalemate t color
-
 (* ==================checkmate======================================== *)
 
 let is_inbetween l p1 p2 c1 c2 =
@@ -559,7 +536,76 @@ let checkpath_list (st : t) (p : piece) =
   if get_piece_type checkPiece = "N" then []
   else path_list st p1 p2 c1 c2
 
+(* ==================state_to_list================================ *)
+
 let state_to_list (st : t) : ((int * int) * piece) list = st
+
+(* ==================insufficient_material================================ *)
+
+let rec remaining_pieces_acc
+    (state : t)
+    (pieces : ((int * int) * piece) list)
+    (acc : piece list) =
+  match pieces with
+  | [] -> acc
+  | (l, p) :: t ->
+      if get_piece_type p != "None" then
+        remaining_pieces_acc state t (p :: acc)
+      else remaining_pieces_acc state t acc
+
+let remaining_pieces st =
+  let t = state_to_list st in
+  remaining_pieces_acc st t []
+
+let prqExists (lst : piece list) =
+  List.exists (fun x -> get_piece_type x = "P") lst
+  || List.exists (fun x -> get_piece_type x = "Q") lst
+  || List.exists (fun x -> get_piece_type x = "R") lst
+
+let knight_endgame (lst : piece list) =
+  List.filter (fun x -> get_piece_type x = "N" && get_color x = "W") lst
+  |> List.length > 1
+  || List.filter
+       (fun x -> get_piece_type x = "N" && get_color x = "B")
+       lst
+     |> List.length > 1
+
+let bishop_endgame (lst : piece list) =
+  let white_bishops =
+    List.filter
+      (fun x -> get_piece_type x = "B" && get_color x = "W")
+      lst
+  in
+  let black_bishops =
+    List.filter
+      (fun x -> get_piece_type x = "B" && get_color x = "W")
+      lst
+  in
+  let white_loc_values =
+    List.map
+      (fun x -> (fst (get_position x) + snd (get_position x)) mod 2)
+      white_bishops
+  in
+  let black_loc_values =
+    List.map
+      (fun x -> (fst (get_position x) + snd (get_position x)) mod 2)
+      black_bishops
+  in
+  List.length white_bishops > 1
+  && List.exists (fun x -> x = 0) white_loc_values
+  && List.exists (fun x -> x = 1) white_loc_values
+  || List.length black_bishops > 1
+     && List.exists (fun x -> x = 0) black_loc_values
+     && List.exists (fun x -> x = 1) black_loc_values
+
+let insufficient_material st =
+  let pieces = remaining_pieces st in
+  if
+    prqExists pieces = false
+    && knight_endgame pieces = false
+    && bishop_endgame pieces = false
+  then true
+  else false
 
 (* ==================alphanum_to_num================================ *)
 

@@ -30,7 +30,7 @@ let get_piece_type (p : piece) =
   | Rook -> "R"
   | Queen -> "Q"
   | King -> "K"
-  | _ -> ""
+  | None -> "None"
 
 let get_position p = p.position
 
