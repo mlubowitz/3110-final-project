@@ -64,20 +64,6 @@ val chk_castl_and_legl :
     legally move to that location. Also checks for if the move would be
     valid castling. If a valid move, calls [check_in_check]*)
 
-val check_in_check :
-  Chess.Board.t ->
-  Chess.State.t ->
-  location ->
-  location ->
-  bool ->
-  string ->
-  updateinfo list
-(** [check_in_check is ] checks if the move would put the current
-    player's king in check. If so, it asks for a new dest location.
-    Otherwise, it returns a list of the selected piece and dest location
-    and whether or not castling should take place so that movement can
-    actually occur. *)
-
 val get_pce_on_dest : Chess.State.t -> location -> Chess.Pieces.piece
 (** [get_pce_ont_dest st dest] is the piece on the location [dest]. If
     [dest] is not a valid location, then ask user for another location

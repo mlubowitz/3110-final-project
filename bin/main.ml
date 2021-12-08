@@ -61,14 +61,7 @@ let get_rk_fin_loc king_dest =
 
 let update_st_castle st king_loc king_dest =
   let rook_loc =
-    match king_dest with
-    | 7, 6
-    | 7, 5 ->
-        (7, 7)
-    | 7, 2
-    | 7, 1 ->
-        (7, 0)
-    | _ -> failwith "This should never be reached"
+    get_position (castle_side st (what_piece st king_dest))
   in
   let rook_fin_loc = get_rk_fin_loc king_dest in
   let moved_king = what_piece st king_loc |> first_move in
@@ -295,51 +288,21 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt player_turn =
 
   (* dest may have changed in get_pce_on_dest *)
   let dest = get_position pce_on_dest in
+  let possible_dests = piece_possible_moves state selected_piece in
 
-  match
-    (* checking for castling *)
-    selected_piece |> get_piece_type = "K"
-    && castle_allowed state sel_pce_loc dest
-  with
-  | true -> check_in_check brd state sel_pce_loc dest true player_turn
-  | false -> (
-      match
-        is_legal state selected_piece pce_on_dest
-        && is_path_empty state sel_pce_loc dest
-      with
-      | true ->
-          check_in_check brd state sel_pce_loc dest false player_turn
-      | false ->
-          let () =
-            print_endline
-              "Your selected piece cannot move to that location. Input \
-               new destination location or type 'reselect'.";
-            print_string ">"
-          in
-          get_dest_loc brd state sel_pce_loc player_turn)
-
-(* =======MUTUAL RECURSION=================== *)
-
-and check_in_check brd st sel_pce_loc dest castle player_turn =
-  let player_color = what_piece st sel_pce_loc |> get_color in
-  let st_w_move =
-    if castle then update_st_castle st sel_pce_loc dest
-    else update_st_norm_move st sel_pce_loc dest
-  in
-  let is_in_check =
-    in_check st_w_move
-      (find_king st_w_move player_color |> what_piece st_w_move)
-  in
-  if is_in_check then
-    let () =
-      print_endline
-        "You would be in check with that move. Can't move. Input new \
-         destination location or 'reselect' piece.";
-      print_string ">"
-    in
-    get_dest_loc brd st sel_pce_loc player_turn
-  else [ Location sel_pce_loc; Location dest; Castle castle ]
-
+  match List.exists (fun x -> x = dest) possible_dests with
+  | false ->
+      let () =
+        print_endline
+          "Your selected piece cannot move to that location. Input new \
+           destination location or type 'reselect'.";
+        print_string ">"
+      in
+      get_dest_loc brd state sel_pce_loc player_turn
+  | true -> (
+      match is_legal_castle state selected_piece pce_on_dest with
+      | true -> [ Location sel_pce_loc; Location dest; Castle true ]
+      | false -> [ Location sel_pce_loc; Location dest; Castle false ])
 (* ============================================================ *)
 
 let get_dest brd state sel_pce_loc player_turn =
