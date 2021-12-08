@@ -130,7 +130,7 @@ and check_all_dests state l p t color destinations unChecked acc =
     match unChecked with
     | [] -> possible_moves_list_acc state t color destinations acc
     | k :: m ->
-        if is_legal state (what_piece state k) p then
+        if is_legal state p (what_piece state k) then
           let st_w_move = update_st_norm_move state l k in
           let is_in_check =
             in_check st_w_move
@@ -153,16 +153,21 @@ let possible_moves_list st pieces color destinations =
    that check is checkamte*)
 let checkmate (st : t) color =
   let king = what_piece st (find_king st color) in
-  if can_king_move st king then false
-  else
-    let pos_list = checkpath_list st king in
-    let t = state_to_list st in
-    possible_moves_list st t color pos_list = []
+  if in_check st king then
+    if can_king_move st king then false
+    else
+      let pos_list = checkpath_list st king in
+      let t = state_to_list st in
+      possible_moves_list st t color pos_list = []
+  else false
 
 let stalemate (st : t) color =
-  let t = state_to_list st in
-  let locs = List.map (fun x -> fst x) t in
-  possible_moves_list st t color locs = []
+  let king = what_piece st (find_king st color) in
+  if in_check st king then false
+  else
+    let t = state_to_list st in
+    let locs = List.map (fun x -> fst x) t in
+    List.length (possible_moves_list st t color locs) = 0
 
 let piece_possible_moves (st : t) (p : piece) =
   let t = state_to_list st in
@@ -432,14 +437,6 @@ let rec play_game brd st player_turn all_boards =
   (* COULD CALL A FUNCTION AT THIS POINT TO CHECK FOR CHECKMATE. IF
      CHECKMATE, THEN THE GAME WOULD STOP AND A WINNER WOULD BE PRINTED
      OUT AT THIS POINT. *)
-  let brd = flip brd in
-  let st =
-    reset_en_passant st (get_color (what_piece st dest)) |> flip_state
-  in
-  let () = print_endline "" in
-  let () = print_endline "Next player - board flipped: " in
-  let () = print_board brd in
-
   let player_turn = update_player_turn player_turn in
 
   if checkmate st player_turn then
@@ -448,6 +445,13 @@ let rec play_game brd st player_turn all_boards =
   else if stalemate st player_turn || insufficient_material st then
     print_endline "Game Over. Stalemate."
   else
+    let brd = flip brd in
+    let st =
+      reset_en_passant st (get_color (what_piece st dest)) |> flip_state
+    in
+    let () = print_endline "" in
+    let () = print_endline "Next player - board flipped: " in
+    let () = print_board brd in
     let () =
       print_endline "";
       print_endline "Keep playing? y or n"
@@ -469,25 +473,3 @@ let main () =
 
 (* Starts game. *)
 let () = main ()
-
-(* ================================================================== *)
-
-let is_castle state (p : piece) (p2 : piece) =
-  let pFst, pSnd = get_position p in
-  let p2Fst, p2Snd = get_position p in
-  let p3 = castle_side state p2 in
-  get_piece_type p = "K"
-  && abs (pSnd - p2Snd) = 2
-  && pFst = p2Fst && can_castle p p3
-  && is_path_empty state (get_position p) (get_position p3)
-  &&
-  if get_color p = "W" then
-    in_check state (what_piece state (7, 4 + ((p2Snd - pSnd) / 2)))
-    = false
-  else
-    in_check state (what_piece state (7, 3 + ((p2Snd - pSnd) / 2)))
-    = false
-
-(*Helper function for checkmate and stalemate. Checks every piece of the
-  person who's turn it is color to see if they can move without causing
-  the king to be in check*)

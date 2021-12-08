@@ -40,8 +40,12 @@ val flip_state : t -> t
    that the state reflects the flipped board. *)
 
 val castle_side : t -> Pieces.piece -> Pieces.piece
-(**[is_path_empty st p2] returns the piece on the side that king wantst
-   to castle where the rook would be at the start of the game *)
+(**[castle_side st p2] is the rook the king wants to castle with given
+   that the king wants to move to [p2]*)
+
+val is_legal_castle : t -> Pieces.piece -> Pieces.piece -> bool
+(**[is_legal_castle st p p2] is [true] if the king can castle moving
+   from its location at p to the location of p2 and [false] otherwise*)
 
 val in_check : t -> Pieces.piece -> bool
 (**[in_check st p] returns [true] if the king is in check *)
@@ -77,9 +81,9 @@ val update_en_passant : int * int -> Pieces.piece -> Pieces.piece
    of the pieces of the color that did not just move set to false *)
 
 val is_legal : t -> Pieces.piece -> Pieces.piece -> bool
-(** [is_legal st piece piece] is the legality of the movement of a given
-    piece [piece] from [ori_loc] to [new_loc]. Raises [Illegal s] if
-    there is no piece at [ori_loc]*)
+(** [is_legal st p p2] is the legality of the movement of a given piece
+    [p] from [ori_loc] to [new_loc]. Raises [Illegal s] if there is no
+    piece at [ori_loc]*)
 
 val insufficient_material : t -> bool
 (**[insufficient_material st] is true if the pieces on the board are not

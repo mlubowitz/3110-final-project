@@ -161,13 +161,6 @@ let rec reset_helper color = function
 
 let reset_en_passant st color = List.map (reset_helper color) st
 
-(* ==================is_legal================================ *)
-
-let is_legal (st : t) (p : piece) (p2 : piece) =
-  if is_legal_PIECES p p2 = true then true
-  else if get_piece_type p = "P" then is_en_passant st p p2
-  else false
-
 (* ==================is_path_empty======================================== *)
 let verticle_move (loc1 : int * int) (loc2 : int * int) =
   snd loc1 = snd loc2 && fst loc1 != fst loc2
@@ -256,13 +249,6 @@ let flip_loc = function
       (new_l, new_loc_piece p new_l)
 
 let flip_state st = List.map flip_loc st
-
-(* ==================castle_side======================================== *)
-(*[castle_side] returns the piece on the side that piece wantst to
-  castle where the rook would be at the start of the game *)
-let castle_side (st : t) (p2 : piece) =
-  if get_position p2 = (7, 6) then what_piece st (7, 7)
-  else what_piece st (7, 0)
 
 (* ==================in_check======================================== *)
 (*[in_check] determines if a player is in check *)
@@ -452,42 +438,92 @@ let rec find_king t color =
       if get_piece_type p = "K" && color = get_color p then l
       else find_king t color
 
+(* ==================is_legal_castle======================================== *)
+(*[is_legal_castle st p p2] returns if the king can castle moving from
+  its location at p to the location of p2 *)
+let castle_side (st : t) (p2 : piece) =
+  if get_position p2 = (7, 6) then what_piece st (7, 7)
+  else what_piece st (7, 0)
+
+let is_legal_castle (st : t) (p : piece) (p2 : piece) =
+  let pFst, pSnd = get_position p in
+  let p2Fst, p2Snd = get_position p in
+  let p3 = castle_side st p2 in
+  get_piece_type p = "K"
+  && abs (pSnd - p2Snd) = 2
+  && pFst = p2Fst && can_castle p p3
+  && is_path_empty st (get_position p) (get_position p3)
+  &&
+  if get_color p = "W" then
+    in_check st (what_piece st (7, 4 + ((p2Snd - pSnd) / 2))) = false
+  else in_check st (what_piece st (7, 3 + ((p2Snd - pSnd) / 2))) = false
+
+(* ==================is_legal================================ *)
+(*[is_legal st p p2] is [true] if given the state of the board [st],
+  piece [p] can move from its current location to the location of [p2]*)
+let is_legal (st : t) (p : piece) (p2 : piece) =
+  if
+    get_piece_type p != "N"
+    && is_path_empty st (get_position p) (get_position p2)
+  then
+    if is_legal_PIECES p p2 = true then true
+    else if get_piece_type p = "P" then is_en_passant st p p2
+    else if get_piece_type p = "K" then is_legal_castle st p p2
+    else false
+  else false
+
 (* ==================possible_moves======================================== *)
 let rec possible_moves t color = "unimplemented"
 
 (* ==================stalemate============================================= *)
 
 let move_up1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst - 1, pSnd) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 0 then false
+  else
+    let p2 = what_piece st (pFst - 1, pSnd) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_down1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst + 1, pSnd) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 7 then false
+  else
+    let p2 = what_piece st (pFst + 1, pSnd) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_left1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst, pSnd - 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pSnd = 0 then false
+  else
+    let p2 = what_piece st (pFst, pSnd - 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_right1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst, pSnd + 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pSnd = 7 then false
+  else
+    let p2 = what_piece st (pFst, pSnd + 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_URdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst - 1, pSnd + 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 0 || pSnd = 7 then false
+  else
+    let p2 = what_piece st (pFst - 1, pSnd + 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_LRdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst + 1, pSnd + 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 7 || pSnd = 7 then false
+  else
+    let p2 = what_piece st (pFst + 1, pSnd + 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_ULdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst - 1, pSnd - 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 0 || pSnd = 0 then false
+  else
+    let p2 = what_piece st (pFst - 1, pSnd - 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let move_LLdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  let p2 = what_piece st (pFst + 1, pSnd - 1) in
-  is_legal st p1 p2 && in_check st p2 = false
+  if pFst = 7 || pSnd = 0 then false
+  else
+    let p2 = what_piece st (pFst + 1, pSnd - 1) in
+    is_legal st p1 p2 && in_check st p2 = false
 
 let can_king_move (st : t) (p1 : piece) =
   let pFst, pSnd = get_position p1 in
