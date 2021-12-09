@@ -4,10 +4,8 @@ open Board
 open Pieces
 open State
 
-let is_legal_PIECES_test name ori_piece new_piece expected =
-  name >:: fun _ ->
-  assert_equal expected (is_legal_PIECES ori_piece new_piece)
-
+(* Pieces to use for testing. *)
+(* empty pieces *)
 let empty_1_1 = to_piece (1, 1) "[ ]"
 
 let empty_2_1 = to_piece (2, 1) "[ ]"
@@ -20,127 +18,151 @@ let empty_7_1 = to_piece (7, 1) "[ ]"
 
 let empty_6_1 = to_piece (6, 1) "[ ]"
 
-let bishop_4_4 = to_piece (4, 4) "[b]"
+(* queens *)
+let w_queen_7_3 = to_piece (7, 3) "[q]"
 
-let bishop_4_4_diff_color = to_piece (4, 4) "[B]"
+let b_queen_0_3 = to_piece (0, 3) "[Q]" (*BLK*)
 
-let bishop_0_0 = to_piece (0, 0) "[b]"
+(* bishops*)
+let w_bishop_4_4 = to_piece (4, 4) "[b]"
 
-let rook_1_0 = to_piece (1, 0) "[r]"
+let b_bishop_4_4 = to_piece (4, 4) "[B]" (*BLK*)
 
-let rook_5_1 = to_piece (5, 1) "[r]"
+let w_bishop_0_0 = to_piece (0, 0) "[b]"
 
-let rook_0_1 = to_piece (0, 1) "[r]"
+(* rooks *)
+let w_rook_1_0 = to_piece (1, 0) "[r]"
 
-let rook_1_4 = to_piece (1, 4) "[r]"
+let w_rook_5_1 = to_piece (5, 1) "[r]"
 
-let pawn_3_1_no_first_move = to_piece (3, 1) "[p]"
+let w_rook_0_1 = to_piece (0, 1) "[r]"
 
-let pawn_3_1_first_move = first_move (to_piece (3, 1) "[p]")
+let w_rook_1_4 = to_piece (1, 4) "[r]"
 
-let king_5_6 = to_piece (5, 6) "[k]"
+let b_rook_0_0 = to_piece (0, 0) "[R]" (*BLK*)
 
-let king_5_5 = to_piece (5, 5) "[k]"
+(* pawns *)
+let b_pawn = to_piece (3, 1) "[P]" (*BLK*)
 
-let king_6_5 = to_piece (6, 5) "[k]"
+let w_pawn = to_piece (0, 1) "[p]"
 
-let king_7_5 = to_piece (7, 5) "[k]"
+let w_pawn_3_1_no_first_move = to_piece (3, 1) "[p]"
 
-let king_7_6 = to_piece (7, 6) "[k]"
+let w_pawn_3_1_first_move = first_move (to_piece (3, 1) "[p]")
 
-let king_7_7 = to_piece (7, 7) "[k]"
+(* kings *)
+let b_king_0_4 = to_piece (0, 4) "[K]" (*BLK*)
 
-let king_6_7 = to_piece (6, 7) "[k]"
+let w_king_5_6 = to_piece (5, 6) "[k]"
 
-let king_5_7 = to_piece (5, 7) "[k]"
+let w_king_5_5 = to_piece (5, 5) "[k]"
 
-let knight_4_5 = to_piece (4, 5) "[n]"
+let w_king_6_5 = to_piece (6, 5) "[k]"
 
-let knight_5_4 = to_piece (5, 4) "[n]"
+let w_king_7_5 = to_piece (7, 5) "[k]"
 
-let knight_7_4 = to_piece (7, 4) "[n]"
+let w_king_7_6 = to_piece (7, 6) "[k]"
 
-let knight_4_7 = to_piece (4, 7) "[n]"
+let w_king_7_7 = to_piece (7, 7) "[k]"
 
-let knight_3_2 = to_piece (3, 2) "[n]"
+let w_king_6_7 = to_piece (6, 7) "[k]"
 
-let knight_0_3 = to_piece (0, 3) "[n]"
+let w_king_5_7 = to_piece (5, 7) "[k]"
 
-let knight_3_0 = to_piece (3, 0) "[n]"
+(* knights *)
+let w_knight_4_5 = to_piece (4, 5) "[n]"
 
-let knight_2_3 = to_piece (2, 3) "[n]"
+let b_knight_4_2 = to_piece (4, 2) "[N]" (*BLK*)
+
+let w_knight_5_4 = to_piece (5, 4) "[n]"
+
+let w_knight_7_4 = to_piece (7, 4) "[n]"
+
+let w_knight_4_7 = to_piece (4, 7) "[n]"
+
+let w_knight_3_2 = to_piece (3, 2) "[n]"
+
+let w_knight_0_3 = to_piece (0, 3) "[n]"
+
+let w_knight_3_0 = to_piece (3, 0) "[n]"
+
+let w_knight_2_3 = to_piece (2, 3) "[n]"
+
+let is_legal_PIECES_test name ori_piece new_piece expected =
+  name >:: fun _ ->
+  assert_equal expected (is_legal_PIECES ori_piece new_piece)
 
 let is_legal_PIECES_tests =
   [
-    is_legal_PIECES_test "bishop from 4,4 to 1,1 is true" bishop_4_4
+    is_legal_PIECES_test "bishop from 4,4 to 1,1 is true" w_bishop_4_4
       empty_1_1 true;
-    is_legal_PIECES_test "bishop from 4,4 to 1,7 is true" bishop_4_4
+    is_legal_PIECES_test "bishop from 4,4 to 1,7 is true" w_bishop_4_4
       empty_1_7 true;
-    is_legal_PIECES_test "bishop from 4,4 to 6,6 is true" bishop_4_4
+    is_legal_PIECES_test "bishop from 4,4 to 6,6 is true" w_bishop_4_4
       empty_6_6 true;
-    is_legal_PIECES_test "bishop from 4,4 to 7,1 is true" bishop_4_4
+    is_legal_PIECES_test "bishop from 4,4 to 7,1 is true" w_bishop_4_4
       empty_7_1 true;
-    is_legal_PIECES_test "bishop from 4,4 to 6,1 is false" bishop_4_4
+    is_legal_PIECES_test "bishop from 4,4 to 6,1 is false" w_bishop_4_4
       empty_6_1 false;
-    is_legal_PIECES_test "rook from 1,0 to 1,1 is true" rook_1_0
+    is_legal_PIECES_test "rook from 1,0 to 1,1 is true" w_rook_1_0
       empty_1_1 true;
-    is_legal_PIECES_test "rook from 5,1 to 1,1 is true" rook_5_1
+    is_legal_PIECES_test "rook from 5,1 to 1,1 is true" w_rook_5_1
       empty_1_1 true;
-    is_legal_PIECES_test "rook from 0,1 to 1,1 is true" rook_0_1
+    is_legal_PIECES_test "rook from 0,1 to 1,1 is true" w_rook_0_1
       empty_1_1 true;
-    is_legal_PIECES_test "rook from 1,4 to 1,1 is true" rook_1_4
+    is_legal_PIECES_test "rook from 1,4 to 1,1 is true" w_rook_1_4
       empty_1_1 true;
-    is_legal_PIECES_test "rook from 1,4 to 6,6 is false" rook_1_4
+    is_legal_PIECES_test "rook from 1,4 to 6,6 is false" w_rook_1_4
       empty_6_6 false;
     is_legal_PIECES_test
-      "rook from 1,4 to same color bishop on 4,4 is false" rook_1_4
-      bishop_4_4 false;
+      "rook from 1,4 to same color bishop on 4,4 is false" w_rook_1_4
+      w_bishop_4_4 false;
     is_legal_PIECES_test
-      "rook from 1,4 to different color bishop on 4,4 is true" rook_1_4
-      bishop_4_4_diff_color true;
+      "rook from 1,4 to different color bishop on 4,4 is true"
+      w_rook_1_4 b_bishop_4_4 true;
     is_legal_PIECES_test "pawn from 3,1 to 1,1 is true"
-      pawn_3_1_no_first_move empty_1_1 true;
+      w_pawn_3_1_no_first_move empty_1_1 true;
     is_legal_PIECES_test "pawn from 3,1 to 2,1 is true"
-      pawn_3_1_no_first_move empty_2_1 true;
+      w_pawn_3_1_no_first_move empty_2_1 true;
     is_legal_PIECES_test "pawn from 3,1 to 1,7 is false"
-      pawn_3_1_no_first_move empty_1_7 false;
+      w_pawn_3_1_no_first_move empty_1_7 false;
     is_legal_PIECES_test "pawn after moving from 3,1 to 1,1 is false"
-      pawn_3_1_first_move empty_1_1 false;
-    is_legal_PIECES_test "king from 5,6 to 6,6 is true" king_5_6
+      w_pawn_3_1_first_move empty_1_1 false;
+    is_legal_PIECES_test "king from 5,6 to 6,6 is true" w_king_5_6
       empty_6_6 true;
-    is_legal_PIECES_test "king from 5,5 to 6,6 is true" king_5_5
+    is_legal_PIECES_test "king from 5,5 to 6,6 is true" w_king_5_5
       empty_6_6 true;
-    is_legal_PIECES_test "king from 6,5 to 6,6 is true" king_6_5
+    is_legal_PIECES_test "king from 6,5 to 6,6 is true" w_king_6_5
       empty_6_6 true;
-    is_legal_PIECES_test "king from 7,5 to 6,6 is true" king_7_5
+    is_legal_PIECES_test "king from 7,5 to 6,6 is true" w_king_7_5
       empty_6_6 true;
-    is_legal_PIECES_test "king from 7,6 to 6,6 is true" king_7_6
+    is_legal_PIECES_test "king from 7,6 to 6,6 is true" w_king_7_6
       empty_6_6 true;
-    is_legal_PIECES_test "king from 7,7 to 6,6 is true" king_7_7
+    is_legal_PIECES_test "king from 7,7 to 6,6 is true" w_king_7_7
       empty_6_6 true;
-    is_legal_PIECES_test "king from 6,7 to 6,6 is true" king_6_7
+    is_legal_PIECES_test "king from 6,7 to 6,6 is true" w_king_6_7
       empty_6_6 true;
-    is_legal_PIECES_test "king from 5,7 to 6,6 is true" king_5_7
+    is_legal_PIECES_test "king from 5,7 to 6,6 is true" w_king_5_7
       empty_6_6 true;
-    is_legal_PIECES_test "king from 5,6 to 7,1 is false" king_5_6
+    is_legal_PIECES_test "king from 5,6 to 7,1 is false" w_king_5_6
       empty_7_1 false;
-    is_legal_PIECES_test "knight from 4,5 to 6,6 is true" knight_4_5
+    is_legal_PIECES_test "knight from 4,5 to 6,6 is true" w_knight_4_5
       empty_6_6 true;
-    is_legal_PIECES_test "knight from 5,4 to 6,6 is true" knight_5_4
+    is_legal_PIECES_test "knight from 5,4 to 6,6 is true" w_knight_5_4
       empty_6_6 true;
-    is_legal_PIECES_test "knight from 7,4 to 6,6 is true" knight_7_4
+    is_legal_PIECES_test "knight from 7,4 to 6,6 is true" w_knight_7_4
       empty_6_6 true;
-    is_legal_PIECES_test "knight from 4,7 to 6,6 is true" knight_4_7
+    is_legal_PIECES_test "knight from 4,7 to 6,6 is true" w_knight_4_7
       empty_6_6 true;
-    is_legal_PIECES_test "knight from 3,2 to 1,1 is true" knight_3_2
+    is_legal_PIECES_test "knight from 3,2 to 1,1 is true" w_knight_3_2
       empty_1_1 true;
-    is_legal_PIECES_test "knight from 0,3 to 1,1 is true" knight_0_3
+    is_legal_PIECES_test "knight from 0,3 to 1,1 is true" w_knight_0_3
       empty_1_1 true;
-    is_legal_PIECES_test "knight from 3,0 to 1,1 is true" knight_3_0
+    is_legal_PIECES_test "knight from 3,0 to 1,1 is true" w_knight_3_0
       empty_1_1 true;
-    is_legal_PIECES_test "knight from 2,3 to 1,1 is true" knight_2_3
+    is_legal_PIECES_test "knight from 2,3 to 1,1 is true" w_knight_2_3
       empty_1_1 true;
-    is_legal_PIECES_test "knight from 2,3 to 6,6 is falses" knight_2_3
+    is_legal_PIECES_test "knight from 2,3 to 6,6 is falses" w_knight_2_3
       empty_6_6 false;
   ]
 
@@ -391,6 +413,50 @@ let st_with_two_pces_tests =
 (* ================================================================ *)
 
 (* ================================================================ *)
+(* ===================TESTING [diag_check_piece] ================== *)
+(* ================================================================ *)
+(* testing to make sure [is_check] works properly. [is_check] calls many
+   helpers, so bugs in it could be in any of them. *)
+let diag_check_piece_test name p p1 p2 expected =
+  name >:: fun _ ->
+  assert_equal expected
+    (diag_check_piece p p1 p2)
+    ~printer:get_piece_type
+
+let diag_check_piece_tests =
+  (* bishop/queen *)
+  (* black box *)
+  [
+    diag_check_piece_test "p = p2 (w_kng), p3 is blk queen" w_king_5_6
+      w_king_5_6 b_queen_0_3 b_queen_0_3;
+    diag_check_piece_test "p = p2 (w_kng), p3 is blk bishop" w_king_5_6
+      w_king_5_6 b_bishop_4_4 b_bishop_4_4;
+    diag_check_piece_test "p = p2 (w_kng), p3 is blk rook" w_king_5_6
+      w_king_5_6 b_rook_0_0 w_king_5_6;
+    diag_check_piece_test "p = p2 (w_kng), p3 is blk knight" w_king_5_6
+      w_king_5_6 b_knight_4_2 w_king_5_6;
+    diag_check_piece_test "p = p2 (w_kng), p3 is blk pawn" w_king_5_6
+      w_king_5_6 b_pawn w_king_5_6;
+    diag_check_piece_test "p = p2 (w_kng), p3 is wht queen" w_king_5_6
+      w_king_5_6 w_queen_7_3 w_king_5_6;
+    diag_check_piece_test "p = p2 (w_kng), p3 is wht bishop" w_king_5_6
+      w_king_5_6 w_bishop_4_4 w_king_5_6;
+    (* below for same color non queen/bishop *)
+    diag_check_piece_test "p = p2 (w_kng), p3 is wht rook" w_king_5_6
+      w_king_5_6 w_rook_1_4 w_king_5_6;
+    diag_check_piece_test
+      "p is w_kng; p2 is blk queen, p3 is blk bishop" w_king_5_6
+      b_queen_0_3 b_bishop_4_4 b_queen_0_3;
+    diag_check_piece_test
+      "p is w_kng; p2 is blk bishop, p3 is blk queen" w_king_5_6
+      b_bishop_4_4 b_queen_0_3 b_bishop_4_4;
+  ]
+
+(* ================================================================ *)
+(* =============FINSIH TESTING [diag_check_piece] ================= *)
+(* ================================================================ *)
+
+(* ================================================================ *)
 (* =============TESTING [in_check] W/ BLK PIECE, WHT K============= *)
 (* ================================================================ *)
 
@@ -492,7 +558,7 @@ module InCheckTester (Pce : PieceType) = struct
     what_piece st20 (grd "d3") |> update_loc st20 (grd "d8")
 
   (* The king pieces used in tests *)
-  let wking_loc43 = what_piece st1 (grd "d4")
+  let wking_loc43 = what_piece check_st2 (grd "d4")
 
   let wking_loc00 = what_piece st20 (grd "a8")
 
@@ -665,6 +731,7 @@ let tests =
            KnightInCheckTests.in_check_tests;
            st_with_two_pces_tests;
            grd_tests;
+           diag_check_piece_tests;
          ]
 
 let _ = run_test_tt_main tests
