@@ -156,4 +156,4 @@ let promotion () =
   draw_string_loc 335 435 "Bishop";
   draw_string_loc 415 435 "Knight"
 
-(*let x = promotion ()*)
+let x = promotion ()
