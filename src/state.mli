@@ -89,3 +89,9 @@ val insufficient_material : t -> bool
 (**[insufficient_material st] is true if the pieces on the board are not
    sufficient for either player to achieve a checkmate, thus it is a
    stalemate*)
+
+val piece_in_path : t -> int * int -> int * int -> Pieces.piece
+(**[piece_in_path st loc1 loc2] returns the piece between [loc1] and
+   [loc2] that is closest to loc1 if such as piece exists. If no piece
+   in between pieces at [loc1] and [loc2] then return the piece at
+   [loc2]. Never returns piece at [loc1]*)
