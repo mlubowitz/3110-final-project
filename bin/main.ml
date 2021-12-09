@@ -402,16 +402,16 @@ let rec play_game brd st player_turn all_boards =
      OUT AT THIS POINT. *)
   let player_turn = update_player_turn player_turn in
 
+  let brd = flip brd in
+  let st =
+    reset_en_passant st (get_color (what_piece st dest)) |> flip_state
+  in
   if checkmate st player_turn then
     if player_turn = "W" then print_endline "Checkmate! Black Wins"
     else print_endline "Checkmate! White Wins"
   else if stalemate st player_turn || insufficient_material st then
     print_endline "Game Over. Stalemate."
   else
-    let brd = flip brd in
-    let st =
-      reset_en_passant st (get_color (what_piece st dest)) |> flip_state
-    in
     let () = print_endline "" in
     let () = print_endline "Next player - board flipped: " in
     let () = print_board brd in

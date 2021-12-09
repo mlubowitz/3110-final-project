@@ -89,7 +89,7 @@ let is_en_passant (st : t) (p : piece) (p2 : piece) =
 
 (* ==================promotion======================================== *)
 let promotion (st : t) (p : piece) (pdest : int * int) =
-  get_piece_type p = "P" && fst pdest = 0
+  get_piece_type p = "P" && fst pdest = 0 && fst (get_position p) = 1
 
 let rec promotion_piece p =
   let () =
@@ -101,10 +101,9 @@ let rec promotion_piece p =
     print_string ">"
   in
   let input = read_line () in
-  let () = print_endline ("your input was" ^ input) in
   match input with
   | "P"
-  | "K"
+  | "N"
   | "B"
   | "R"
   | "Q" ->
@@ -151,6 +150,14 @@ let update_loc (st : t) (dest : int * int) (p : piece) =
     in
     update_loc_helper st (get_position p2) p
   else if promotion st p dest then
+    let () =
+      print_endline
+        ("("
+        ^ string_of_int (fst (get_position p))
+        ^ ", "
+        ^ string_of_int (snd (get_position p)))
+    in
+    let () = print_endline (get_color p) in
     update_loc_helper st dest (promotion_piece p)
   else update_loc_helper st (get_position p2) p
 
