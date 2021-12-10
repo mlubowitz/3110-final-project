@@ -44,23 +44,14 @@ let get_color p =
 
 let get_en_passant p = p.en_passant
 
-let piece_picture (p : piece) =
-  match (p.piece_type, p.color) with
-  | Pawn, White -> "♙"
-  | Pawn, Black -> "♟︎"
-  | Bishop, White -> "♗"
-  | Bishop, Black -> "♝"
-  | Knight, White -> "♘"
-  | Knight, Black -> "♞"
-  | Rook, White -> "♖"
-  | Rook, Black -> "♜"
-  | Queen, White -> "♕"
-  | Queen, Black -> "♛"
-  | King, White -> "♔"
-  | King, Black -> "♚"
-  | _ -> " "
-
 exception Illegal of string
+
+(* let piece_picture (p : piece) = match (p.piece_type, p.color) with |
+   Pawn, White -> "♙" | Pawn, Black -> "♟︎" | Bishop, White -> "♗" |
+   Bishop, Black -> "♝" | Knight, White -> "♘" | Knight, Black -> "♞" |
+   Rook, White -> "♖" | Rook, Black -> "♜" | Queen, White -> "♕" |
+   Queen, Black -> "♛" | King, White -> "♔" | King, Black -> "♚" | _ ->
+   " " *)
 
 let is_piece (p : piece) = p.piece_type != None
 
@@ -199,8 +190,6 @@ let queen_is_legal ori_loc new_loc =
 let king_is_legal ori_loc new_loc =
   abs (fst ori_loc - fst new_loc) <= 1
   && abs (snd ori_loc - snd new_loc) <= 1
-
-let id x = x
 
 let is_legal_PIECES (p : piece) (p2 : piece) =
   let a, b = get_position p2 in
