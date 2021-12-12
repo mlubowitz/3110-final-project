@@ -192,8 +192,9 @@ let rec get_sel_pce_loc state player_turn =
       | false ->
           let () =
             print_endline
-              "Not a valid piece. Input location of piece you want to \
-               select.";
+              "Not a valid piece, or this piece does not have any \
+               valid moves, or wrong color. Input location of piece \
+               you want to select.";
             print_string ">"
           in
           get_sel_pce_loc state player_turn)
@@ -223,22 +224,6 @@ let rec normal_move brd st sel_pce_loc dest =
     update_board brd new_st sel_pce_loc dest prmtion enpsnt
   in
   [ Board new_brd; State new_st ]
-
-(* ======================================================== *)
-
-let castle_allowed state king_loc king_dest =
-  let king_pce = what_piece state king_loc in
-  let king_color = get_color king_pce in
-  let val_dest =
-    match king_color with
-    | "W" -> king_dest = (7, 6) || king_dest = (7, 2)
-    | "B" -> king_dest = (7, 5) || king_dest = (7, 1)
-    | _ -> failwith "This should never be reached."
-  in
-  val_dest
-  && (can_castle king_pce (what_piece state (7, 7))
-     || can_castle king_pce (what_piece state (7, 0)))
-  && is_path_empty state king_loc king_dest
 
 (* ======================================================= *)
 

@@ -43,6 +43,11 @@ val castle_side : t -> Pieces.piece -> Pieces.piece
 (**[castle_side st p2] is the rook the king wants to castle with given
    that the king wants to move to [p2]*)
 
+val castle_allowed : Chess.State.t -> int * int -> int * int -> bool
+(** [castle_allowed state king_loc king_dest] is true if a castle move
+    is allowed for the king at location [king_loc] and the dest loc
+    [king_dest]. Requries: [king_loc is location of a king] *)
+
 val is_legal_castle : t -> Pieces.piece -> Pieces.piece -> bool
 (**[is_legal_castle st p p2] is [true] if the king can castle moving
    from its location at p to the location of p2 and [false] otherwise*)

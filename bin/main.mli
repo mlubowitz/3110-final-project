@@ -69,11 +69,6 @@ val get_pce_on_dest : Chess.State.t -> location -> Chess.Pieces.piece
     [dest] is not a valid location, then ask user for another location
     until valid location is inputted. *)
 
-val castle_allowed : Chess.State.t -> location -> location -> bool
-(** [castle_allowed state king_loc king_dest] is true if a castle move
-    is allowed for the king at location [king_loc] and the dest loc
-    [king_dest]. Requries: [king_loc is location of a king] *)
-
 val get_rk_fin_loc : location -> location
 (** [get_rk_fin_loc king_loc] returns the final location of the rook
     after castling. This depends on the destination position of the
