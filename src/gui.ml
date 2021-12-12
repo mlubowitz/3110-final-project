@@ -1,3 +1,4 @@
+open Pieces
 open Graphics
 
 type rectangle = string
@@ -120,15 +121,53 @@ let init_setup init_x init_y s =
       "ROOK";
     ]
 
-let init =
+let new_board () =
   open_graph " 800x800";
   set_window_title "Chess Game";
   set_background (rgb 23 48 27);
   board_background 40 40 710 (rgb 99 46 21);
   board_background 70 70 650 (rgb 142 145 142);
   draw_matrix 75 75 80 8 8 true;
-  notation 80 53 55;
+  notation 80 53 55
+
+let draw_string_loc x y str =
+  moveto x y;
+  draw_string str
+
+let init =
+  new_board ();
   init_setup 75 75 80
+
+let matrix_notation_to_string_loc_x notation =
+  let x_pos = snd notation in
+  (x_pos * 80) + 101
+
+let matrix_notation_to_string_loc_y notation =
+  let y_pos = fst notation in
+  (y_pos * 80) + 185
+
+let position_piece notation piece =
+  let draw_string_piece =
+    draw_string_loc
+      (matrix_notation_to_string_loc_x notation)
+      (matrix_notation_to_string_loc_y notation)
+  in
+  match get_piece_type piece with
+  | "P" -> draw_string_piece "PAWN"
+  | "B" -> draw_string_piece "BISHOP"
+  | "N" -> draw_string_piece "KNIGHT"
+  | "R" -> draw_string_piece "ROOK"
+  | "Q" -> draw_string_piece "QUEEN"
+  | "K" -> draw_string_piece "KING"
+  | _ -> ()
+
+let rec new_board_with_pieces a_list =
+  new_board ();
+  match a_list with
+  | [] -> ()
+  | h :: t ->
+      position_piece (fst h) (snd h);
+      new_board_with_pieces t
 
 let conv_to_x coor = (coor - 75) / 80
 
@@ -140,10 +179,6 @@ let conv_to_loc =
     | { mouse_x; mouse_y } -> (mouse_x, mouse_y)
   in
   (conv_to_y (snd det_position), conv_to_x (fst det_position))
-
-let draw_string_loc x y str =
-  moveto x y;
-  draw_string str
 
 let promotion () =
   board_background 75 75 640 (rgb 0 0 0);
