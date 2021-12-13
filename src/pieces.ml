@@ -214,6 +214,8 @@ let can_castle (p1 : piece) (p3 : piece) =
 
 let first_move (p : piece) = { p with no_first_move = false }
 
+let update_internal_loc p loc = { p with position = loc }
+
 let en_passant_true (p : piece) = { p with en_passant = true }
 
 let en_passant_false (p : piece) = { p with en_passant = false }

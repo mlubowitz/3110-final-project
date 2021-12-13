@@ -53,7 +53,8 @@ let rec update_st_once st loc pce =
       else (l, p) :: update_st_once t loc pce
 
 let update_loc_helper (st : t) (loc : int * int) pce : t =
-  let st_with_pce_moved = update_st_once st loc pce in
+  let pce_w_updated_loc = update_internal_loc pce loc in
+  let st_with_pce_moved = update_st_once st loc pce_w_updated_loc in
   let ori_loc = get_position pce in
   let fully_updated_st =
     update_st_once st_with_pce_moved ori_loc (to_piece ori_loc "[ ]")

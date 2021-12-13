@@ -75,3 +75,7 @@ val get_color : piece -> string
 
 val promotion_change : piece -> string -> piece
 (**[promtion_change pce ]*)
+
+val update_internal_loc : piece -> int * int -> piece
+(* [update_internal_loc p loc] is piece [p] with its position field set
+   to [loc]. *)
