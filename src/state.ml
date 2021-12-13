@@ -423,7 +423,9 @@ let in_check_piece (st : t) (p : piece) color =
   else if knightP != p then knightP
   else p
 
-let in_check (st : t) (p : piece) color = in_check_piece st p color != p
+let in_check (st : t) (p : piece) color =
+  let checkPiece = in_check_piece st p color in
+  checkPiece != p && get_color p != get_color checkPiece
 
 (* ==================find_king======================================== *)
 let rec find_king t color =
