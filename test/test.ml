@@ -32,6 +32,8 @@ open State
 
   [is_legal_PIECES]
 
+  [is_legal_castle]
+
   What we tested with OUnit vs manual:
 
   ***************************************************************************)
@@ -495,7 +497,6 @@ let is_legal_castle_test name st p p1 expected =
 let is_legal_castle_tests =
   (* black box *)
   [
-    (* no moved pieces, can castle? *)
     is_legal_castle_test
       " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if pieces \
        inbtwn"
