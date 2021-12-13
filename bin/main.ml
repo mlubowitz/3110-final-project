@@ -116,7 +116,7 @@ let list_to_string (lst : (int * int) list) =
 
 let king_legal_move (st : t) (p : piece) (dest : int * int) =
   let newKing = new_loc_piece p dest in
-  if in_check st newKing then false else true
+  if in_check st newKing (get_color newKing) then false else true
 
 let rec possible_moves_list_acc
     (state : State.t)
@@ -137,10 +137,6 @@ and check_all_dests state l p t color destinations unChecked acc =
   | [] -> possible_moves_list_acc state t color destinations acc
   | k :: m ->
       if is_legal state p (what_piece state k) then
-        let () =
-          print_endline
-            (get_piece_type p ^ list_to_string [ get_position p; k ])
-        in
         let st_w_move =
           if is_legal_castle state p (what_piece state k) then
             update_st_castle state l k
@@ -149,6 +145,7 @@ and check_all_dests state l p t color destinations unChecked acc =
         let is_in_check =
           in_check st_w_move
             (find_king st_w_move color |> what_piece st_w_move)
+            color
         in
         if is_in_check then
           check_all_dests state l p t color destinations m acc
@@ -165,7 +162,7 @@ let possible_moves_list st pieces color destinations =
    that check is checkamte*)
 let checkmate (st : t) color =
   let king = what_piece st (find_king st color) in
-  if in_check st king then
+  if in_check st king color then
     let t = state_to_list st in
     let locs = List.map (fun x -> fst x) t in
     possible_moves_list st t color locs = []
@@ -173,7 +170,7 @@ let checkmate (st : t) color =
 
 let stalemate (st : t) color =
   let king = what_piece st (find_king st color) in
-  if in_check st king then false
+  if in_check st king color then false
   else
     let t = state_to_list st in
     let locs = List.map (fun x -> fst x) t in
@@ -360,7 +357,7 @@ let rec play_game brd st player_turn all_boards =
   let () = print_endline (list_to_string moves) in
 
   let is_in_check =
-    in_check st (find_king st player_turn |> what_piece st)
+    in_check st (find_king st player_turn |> what_piece st) player_turn
   in
   let () =
     print_endline

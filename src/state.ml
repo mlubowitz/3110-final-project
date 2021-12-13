@@ -253,13 +253,14 @@ let flip_state st = List.map flip_loc st
 (* ==================in_check======================================== *)
 (*[in_check] determines if a player is in check *)
 
-let diagonal_check_helper (st : t) (p : piece) =
+let diagonal_check_helper (st : t) (p : piece) color =
   let a, b = get_position p in
   if a + b <= 7 then
     let diag_ch =
       diag_check_piece p
         (piece_in_path st (a, b) (0, a + b))
         (what_piece st (0, a + b))
+        color
     in
     if diag_ch != p then diag_ch (*top right diagonal*)
     else
@@ -268,30 +269,35 @@ let diagonal_check_helper (st : t) (p : piece) =
         diag_check_piece p
           (piece_in_path st (a, b) (a + b, 0))
           (what_piece st (a + b, 0))
+          color
       in
       if d2 != p then d2 else p (*bottom left diagonal*)
   else if
     diag_check_piece p
       (piece_in_path st (a, b) (7 - (a - b), 7))
       (what_piece st (7 - (a - b), 7))
+      color
     != p
   then
     diag_check_piece p
       (piece_in_path st (a, b) (7 - (a - b), 7))
-      (what_piece st (7 - (a - b), 7)) (*top right diagonal*)
+      (what_piece st (7 - (a - b), 7))
+      color (*top right diagonal*)
   else if
     diag_check_piece p
       (piece_in_path st (a, b) (7, a + b - 7))
       (what_piece st (7, a + b - 7))
+      color
     != p
   then
     diag_check_piece p
       (piece_in_path st (a, b) (7, a + b - 7))
       (what_piece st (7, a + b - 7))
+      color
   else p
 
 (*bottom left diagonal*)
-let in_check_diagonals (st : t) (p : piece) : piece =
+let in_check_diagonals (st : t) (p : piece) color =
   let a, b = get_position p in
   (*row > column to check diagonals for top left and bottom right*)
   if a >= b then
@@ -299,43 +305,51 @@ let in_check_diagonals (st : t) (p : piece) : piece =
       diag_check_piece p
         (piece_in_path st (a, b) (a - b, 0))
         (what_piece st (a - b, 0))
+        color
       != p
     then
       diag_check_piece p
         (piece_in_path st (a, b) (a - b, 0))
-        (what_piece st (a - b, 0)) (*top left diagonal*)
+        (what_piece st (a - b, 0))
+        color (*top left diagonal*)
     else if
       diag_check_piece p
         (piece_in_path st (a, b) (7, 7 - (a - b)))
         (what_piece st (7, 7 - (a - b)))
+        color
       != p
     then
       diag_check_piece p
         (piece_in_path st (a, b) (7, 7 - (a - b)))
-        (what_piece st (7, 7 - (a - b))) (*bottom right diagonal*)
-    else if diagonal_check_helper st p != p then
-      diagonal_check_helper st p
+        (what_piece st (7, 7 - (a - b)))
+        color (*bottom right diagonal*)
+    else if diagonal_check_helper st p color != p then
+      diagonal_check_helper st p color
     else p
   else if
     diag_check_piece p
       (piece_in_path st (a, b) (0, b - a))
       (what_piece st (0, b - a))
+      color
     != p
   then
     diag_check_piece p
       (piece_in_path st (a, b) (0, b - a))
-      (what_piece st (0, b - a)) (*top left diagonal*)
+      (what_piece st (0, b - a))
+      color (*top left diagonal*)
   else if
     diag_check_piece p
       (piece_in_path st (a, b) (7 - (b - a), 7))
       (what_piece st (7 - (b - a), 7))
+      color
     != p
   then
     diag_check_piece p
       (piece_in_path st (a, b) (7 - (b - a), 7))
-      (what_piece st (7 - (b - a), 7)) (*bottom right diagonal*)
-  else if diagonal_check_helper st p != p then
-    diagonal_check_helper st p
+      (what_piece st (7 - (b - a), 7))
+      color (*bottom right diagonal*)
+  else if diagonal_check_helper st p color != p then
+    diagonal_check_helper st p color
   else p
 
 let orthog_adj_check_help
@@ -343,77 +357,73 @@ let orthog_adj_check_help
     (p : piece)
     (a : int)
     (b : int)
-    (end_loc : int * int) =
+    (end_loc : int * int)
+    (color : string) =
   let a, b = get_position p in
   orthog_adj_check_piece p
     (piece_in_path st (a, b) (fst end_loc, snd end_loc))
     (what_piece st (fst end_loc, snd end_loc))
+    color
 
-let in_check_orthog_adj (st : t) (p : piece) =
+let in_check_orthog_adj (st : t) (p : piece) color =
   let a, b = get_position p in
-  if orthog_adj_check_help st p a b (a, 0) != p then
-    orthog_adj_check_help st p a b (a, 0)
-  else if orthog_adj_check_help st p a b (a, 7) != p then
-    orthog_adj_check_help st p a b (a, 7)
-  else if orthog_adj_check_help st p a b (0, b) != p then
-    orthog_adj_check_help st p a b (0, b)
-  else if orthog_adj_check_help st p a b (7, b) != p then
-    orthog_adj_check_help st p a b (7, b)
+  if orthog_adj_check_help st p a b (a, 0) color != p then
+    orthog_adj_check_help st p a b (a, 0) color
+  else if orthog_adj_check_help st p a b (a, 7) color != p then
+    orthog_adj_check_help st p a b (a, 7) color
+  else if orthog_adj_check_help st p a b (0, b) color != p then
+    orthog_adj_check_help st p a b (0, b) color
+  else if orthog_adj_check_help st p a b (7, b) color != p then
+    orthog_adj_check_help st p a b (7, b) color
   else p
 
-let in_check_knight (st : t) (p : piece) =
+let in_check_knight (st : t) (p : piece) color =
   let a, b = get_position p in
   if
     a > 1 && b > 0
-    && knight_check_piece p (what_piece st (a - 2, b - 1)) != p
-  then knight_check_piece p (what_piece st (a - 2, b - 1))
+    && knight_check_piece p (what_piece st (a - 2, b - 1)) color != p
+  then knight_check_piece p (what_piece st (a - 2, b - 1)) color
   else if
     a > 1 && b < 7
-    && knight_check_piece p (what_piece st (a - 2, b + 1)) != p
-  then knight_check_piece p (what_piece st (a - 2, b + 1))
+    && knight_check_piece p (what_piece st (a - 2, b + 1)) color != p
+  then knight_check_piece p (what_piece st (a - 2, b + 1)) color
   else if
     a > 0 && b > 1
-    && knight_check_piece p (what_piece st (a - 1, b - 2)) != p
-  then knight_check_piece p (what_piece st (a - 1, b - 2))
+    && knight_check_piece p (what_piece st (a - 1, b - 2)) color != p
+  then knight_check_piece p (what_piece st (a - 1, b - 2)) color
   else if
     a > 0 && b < 6
-    && knight_check_piece p (what_piece st (a - 1, b + 2)) != p
-  then knight_check_piece p (what_piece st (a - 1, b + 2))
+    && knight_check_piece p (what_piece st (a - 1, b + 2)) color != p
+  then knight_check_piece p (what_piece st (a - 1, b + 2)) color
   else if
     a < 7 && b > 1
-    && knight_check_piece p (what_piece st (a + 1, b - 2)) != p
-  then knight_check_piece p (what_piece st (a + 1, b - 2))
+    && knight_check_piece p (what_piece st (a + 1, b - 2)) color != p
+  then knight_check_piece p (what_piece st (a + 1, b - 2)) color
   else if
     a < 7 && b < 6
-    && knight_check_piece p (what_piece st (a + 1, b + 2)) != p
-  then knight_check_piece p (what_piece st (a + 1, b + 2))
+    && knight_check_piece p (what_piece st (a + 1, b + 2)) color != p
+  then knight_check_piece p (what_piece st (a + 1, b + 2)) color
   else if
     a < 6 && b > 0
-    && knight_check_piece p (what_piece st (a + 2, b - 1)) != p
-  then knight_check_piece p (what_piece st (a + 2, b - 1))
+    && knight_check_piece p (what_piece st (a + 2, b - 1)) color != p
+  then knight_check_piece p (what_piece st (a + 2, b - 1)) color
   else if
     a < 6 && b < 7
-    && knight_check_piece p (what_piece st (a + 2, b + 1)) != p
-  then knight_check_piece p (what_piece st (a + 2, b + 1))
+    && knight_check_piece p (what_piece st (a + 2, b + 1)) color != p
+  then knight_check_piece p (what_piece st (a + 2, b + 1)) color
   else p
 
 (* returns piece that checks king or if no such piece then king *)
-let in_check_piece (st : t) (p : piece) =
-  let diagP = in_check_diagonals st p in
-  let orthoAdjP = in_check_orthog_adj st p in
-  let knightP = in_check_knight st p in
+let in_check_piece (st : t) (p : piece) color =
+  let diagP = in_check_diagonals st p color in
+  let orthoAdjP = in_check_orthog_adj st p color in
+  let knightP = in_check_knight st p color in
   if diagP != p then diagP
   else if orthoAdjP != p then orthoAdjP
   else if knightP != p then knightP
   else p
 
-let in_check (st : t) (p : piece) = in_check_piece st p != p
-
-let in_check_castle (st : t) (p : piece) color =
-  in_check_piece st p != p
-  &&
-  if color = "W" then get_color (in_check_piece st p) = "B"
-  else get_color (in_check_piece st p) != "W"
+let in_check (st : t) (p : piece) color = in_check_piece st p color != p
 
 (* ==================find_king======================================== *)
 let rec find_king t color =
@@ -434,18 +444,14 @@ let is_legal_castle (st : t) (p : piece) (p2 : piece) =
   let pFst, pSnd = get_position p in
   let p2Fst, p2Snd = get_position p2 in
   let p3 = castle_side st p2 in
+  let color = get_color p in
   get_piece_type p = "K"
-  && in_check st p = false
+  && in_check st p color = false
   && abs (pSnd - p2Snd) = 2
   && pFst = p2Fst && can_castle p p3
   && is_path_empty st (get_position p) (get_position p3)
-  &&
-  if get_color p = "W" then
-    in_check_castle st (what_piece st (7, 4 + ((p2Snd - pSnd) / 2))) "W"
-    = false
-  else
-    in_check_castle st (what_piece st (7, 3 + ((p2Snd - pSnd) / 2))) "B"
-    = false
+  && in_check st (what_piece st (7, 4 + ((p2Snd - pSnd) / 2))) color
+     = false
 
 (* ==================is_legal================================ *)
 (*[is_legal st p p2] is [true] if given the state of the board [st],
@@ -454,7 +460,8 @@ let is_legal (st : t) (p : piece) (p2 : piece) =
   if is_legal_PIECES p p2 then
     if get_piece_type p = "N" then true
     else if is_path_empty st (get_position p) (get_position p2) then
-      if get_piece_type p != "K" then true else in_check st p2 = false
+      if get_piece_type p != "K" then true
+      else in_check st p2 (get_color p) = false
     else false
   else if get_piece_type p = "P" then is_en_passant st p p2
   else if get_piece_type p = "K" && is_legal_castle st p p2 then true
@@ -494,7 +501,7 @@ let rec path_list_acc t acc p1 p2 c1 c2 =
 let path_list t c1 c2 p1 p2 = path_list_acc t [ (c1, c2) ] p1 p2 c1 c2
 
 let checkpath_list (st : t) (p : piece) =
-  let checkPiece = in_check_piece st p in
+  let checkPiece = in_check_piece st p (get_color p) in
   let c1, c2 = get_position checkPiece in
   let p1, p2 = get_position p in
   if get_piece_type checkPiece = "N" then []

@@ -50,24 +50,24 @@ val can_castle : piece -> piece -> bool
 (** [can_castle p1 p3] returns [true] if [p3] is a rook and neither [p1]
     nor [p3] has moved, and [false] otherwise*)
 
-val diag_check_piece : piece -> piece -> piece -> piece
-(** [diag_check_piece p p2 p3] is [p] UNLESS [p2] or [p3] is
+val diag_check_piece : piece -> piece -> piece -> string -> piece
+(** [diag_check_piece p p2 p3 color] is [p] UNLESS [p2] or [p3] is
     bishop/queen's of opposite color. Return [p2] or [p3] if either is
-    bishop/queen of opposite color. If both are bishop/queen of opposite
-    color, return [p2].*)
+    bishop/queen and not of color [color]. If both are bishop/queen of
+    opposite color, return [p2].*)
 
 (* To help understand above: [p2] is the piece that [piece_in_path] from
    state returns. Checks p2 or p3 color first, then it checks*)
 
-val orthog_adj_check_piece : piece -> piece -> piece -> piece
-(** [orthog_adj_check_piece p p2 p3] is [p] UNLESS [p2] or [p3] are
-    rook/queen's of opposite color. Return [p2] or [p3] if either is
-    rook/queen of opposite color. If both are rook/queen of opposite
-    color, return [p2].*)
+val orthog_adj_check_piece : piece -> piece -> piece -> string -> piece
+(** [orthog_adj_check_piece p p2 p3 color] is [p] UNLESS [p2] or [p3]
+    are rook/queen's of opposite color. Return [p2] or [p3] if either is
+    rook/queen and not of color [color]. If both are rook/queen of
+    opposite color, return [p2].*)
 
-val knight_check_piece : piece -> piece -> piece
-(** [knight_check_piece p p2] is [p2] if [p2] is a knight of opposite
-    color to [p]. Otherwise, return [p].*)
+val knight_check_piece : piece -> piece -> string -> piece
+(** [knight_check_piece p p2 color] is [p2] if [p2] is a knight of not
+    of color [color] . Otherwise, return [p].*)
 
 val get_color : piece -> string
 (** [get_color p] is either "W", "B", or "N" (no color) depending on the

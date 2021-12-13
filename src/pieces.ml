@@ -223,23 +223,28 @@ let en_passant_false (p : piece) = { p with en_passant = false }
 let new_loc_piece (p : piece) (new_loc : int * int) =
   { p with position = new_loc }
 
-let diag_check_piece (p : piece) (p2 : piece) (p3 : piece) =
+let diag_check_piece
+    (p : piece)
+    (p2 : piece)
+    (p3 : piece)
+    (pcolor : string) =
   let pp = if p = p2 then p3 else p2 in
-  if p.color = pp.color then p
+  if pcolor = get_color pp then p
   else if
     pp.piece_type = Queen || pp.piece_type = Bishop
     || (pp.piece_type = Pawn && fst pp.position - fst p.position = 1)
   then pp
   else p
 
-let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
+let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) pcolor
+    =
   let pp = if p = p2 then p3 else p2 in
-  if p.color = pp.color then p
+  if pcolor = get_color pp then p
   else if pp.piece_type = Rook || pp.piece_type = Queen then pp
   else p
 
-let knight_check_piece (p : piece) (p2 : piece) =
-  if p.color != p2.color && p2.piece_type = Knight then p2 else p
+let knight_check_piece (p : piece) (p2 : piece) pcolor =
+  if pcolor != get_color p2 && p2.piece_type = Knight then p2 else p
 
 let promotion_change (p : piece) (s : string) : piece =
   match s with
