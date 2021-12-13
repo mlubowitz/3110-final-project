@@ -409,6 +409,12 @@ let in_check_piece (st : t) (p : piece) =
 
 let in_check (st : t) (p : piece) = in_check_piece st p != p
 
+let in_check_castle (st : t) (p : piece) color =
+  in_check_piece st p != p
+  &&
+  if color = "W" then get_color (in_check_piece st p) = "B"
+  else get_color (in_check_piece st p) != "W"
+
 (* ==================find_king======================================== *)
 let rec find_king t color =
   match t with
@@ -426,7 +432,7 @@ let castle_side (st : t) (p2 : piece) =
 
 let is_legal_castle (st : t) (p : piece) (p2 : piece) =
   let pFst, pSnd = get_position p in
-  let p2Fst, p2Snd = get_position p in
+  let p2Fst, p2Snd = get_position p2 in
   let p3 = castle_side st p2 in
   get_piece_type p = "K"
   && in_check st p = false
@@ -435,8 +441,11 @@ let is_legal_castle (st : t) (p : piece) (p2 : piece) =
   && is_path_empty st (get_position p) (get_position p3)
   &&
   if get_color p = "W" then
-    in_check st (what_piece st (7, 4 + ((p2Snd - pSnd) / 2))) = false
-  else in_check st (what_piece st (7, 3 + ((p2Snd - pSnd) / 2))) = false
+    in_check_castle st (what_piece st (7, 4 + ((p2Snd - pSnd) / 2))) "W"
+    = false
+  else
+    in_check_castle st (what_piece st (7, 3 + ((p2Snd - pSnd) / 2))) "B"
+    = false
 
 (* ==================is_legal================================ *)
 (*[is_legal st p p2] is [true] if given the state of the board [st],

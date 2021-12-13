@@ -137,23 +137,15 @@ and check_all_dests state l p t color destinations unChecked acc =
   | [] -> possible_moves_list_acc state t color destinations acc
   | k :: m ->
       if is_legal state p (what_piece state k) then
-        (* let king = find_king state color |> what_piece state in if p
-           = king && is_legal_castle state p (what_piece state k) =
-           false then if king_legal_move state p k then let () =
-           print_endline "legal" in check_all_dests state l p t color
-           destinations m (k :: acc) else let () = print_endline "not
-           legal" in check_all_dests state l p t color destinations m
-           acc else *)
+        let () =
+          print_endline
+            (get_piece_type p ^ list_to_string [ get_position p; k ])
+        in
         let st_w_move =
           if is_legal_castle state p (what_piece state k) then
             update_st_castle state l k
           else update_st_norm_move state l k
         in
-        let kingloc =
-          find_king st_w_move color
-          |> what_piece st_w_move |> get_position
-        in
-        let () = print_endline (list_to_string [ kingloc ]) in
         let is_in_check =
           in_check st_w_move
             (find_king st_w_move color |> what_piece st_w_move)
