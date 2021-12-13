@@ -618,10 +618,10 @@ let st_with_two_pces_tests =
 (* ================================================================ *)
 (* testing to make sure [is_check] works properly. [is_check] calls many
    helpers, so bugs in it could be in any of them. *)
-let diag_check_piece_test name p p1 p2 expected =
+let diag_check_piece_test name p p1 p2 kg_color expected =
   name >:: fun _ ->
   assert_equal expected
-    (diag_check_piece p p1 p2)
+    (diag_check_piece p p1 p2 kg_color)
     ~printer:get_piece_type
 
 let diag_check_piece_tests =
@@ -629,28 +629,28 @@ let diag_check_piece_tests =
   (* black box *)
   [
     diag_check_piece_test "p = p2 (w_kng), p3 is blk queen" w_king_5_6
-      w_king_5_6 b_queen_0_3 b_queen_0_3;
+      w_king_5_6 b_queen_0_3 (get_color w_king_5_6) b_queen_0_3;
     diag_check_piece_test "p = p2 (w_kng), p3 is blk bishop" w_king_5_6
-      w_king_5_6 b_bishop_4_4 b_bishop_4_4;
+      w_king_5_6 b_bishop_4_4 (get_color w_king_5_6) b_bishop_4_4;
     diag_check_piece_test "p = p2 (w_kng), p3 is blk rook" w_king_5_6
-      w_king_5_6 b_rook_0_0 w_king_5_6;
+      w_king_5_6 b_rook_0_0 (get_color w_king_5_6) w_king_5_6;
     diag_check_piece_test "p = p2 (w_kng), p3 is blk knight" w_king_5_6
-      w_king_5_6 b_knight_4_2 w_king_5_6;
+      w_king_5_6 b_knight_4_2 (get_color w_king_5_6) w_king_5_6;
     diag_check_piece_test "p = p2 (w_kng), p3 is blk pawn" w_king_5_6
-      w_king_5_6 b_pawn w_king_5_6;
+      w_king_5_6 b_pawn (get_color w_king_5_6) w_king_5_6;
     diag_check_piece_test "p = p2 (w_kng), p3 is wht queen" w_king_5_6
-      w_king_5_6 w_queen_7_3 w_king_5_6;
+      w_king_5_6 w_queen_7_3 (get_color w_king_5_6) w_king_5_6;
     diag_check_piece_test "p = p2 (w_kng), p3 is wht bishop" w_king_5_6
-      w_king_5_6 w_bishop_4_4 w_king_5_6;
+      w_king_5_6 w_bishop_4_4 (get_color w_king_5_6) w_king_5_6;
     (* below for same color non queen/bishop *)
     diag_check_piece_test "p = p2 (w_kng), p3 is wht rook" w_king_5_6
-      w_king_5_6 w_rook_1_4 w_king_5_6;
+      w_king_5_6 w_rook_1_4 (get_color w_king_5_6) w_king_5_6;
     diag_check_piece_test
       "p is w_kng; p2 is blk queen, p3 is blk bishop" w_king_5_6
-      b_queen_0_3 b_bishop_4_4 b_queen_0_3;
+      b_queen_0_3 b_bishop_4_4 (get_color w_king_5_6) b_queen_0_3;
     diag_check_piece_test
       "p is w_kng; p2 is blk bishop, p3 is blk queen" w_king_5_6
-      b_bishop_4_4 b_queen_0_3 b_bishop_4_4;
+      b_bishop_4_4 b_queen_0_3 (get_color w_king_5_6) b_bishop_4_4;
   ]
 
 (* ================================================================ *)
@@ -662,10 +662,10 @@ let diag_check_piece_tests =
 (* ================================================================ *)
 (* testing to make sure [is_check] works properly. [is_check] calls many
    helpers, so bugs in it could be in any of them. *)
-let orthog_adj_check_piece_test name p p1 p2 expected =
+let orthog_adj_check_piece_test name p p1 p2 kg_color expected =
   name >:: fun _ ->
   assert_equal expected
-    (orthog_adj_check_piece p p1 p2)
+    (orthog_adj_check_piece p p1 p2 kg_color)
     ~printer:get_piece_type
 
 let orthog_adj_check_piece_tests =
@@ -674,41 +674,44 @@ let orthog_adj_check_piece_tests =
   [
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is blk queen" w_king_5_6
-      w_king_5_6 b_queen_0_3 b_queen_0_3;
+      w_king_5_6 b_queen_0_3 (get_color w_king_5_6) b_queen_0_3;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is blk bishop" w_king_5_6
-      w_king_5_6 b_bishop_4_4 w_king_5_6;
+      w_king_5_6 b_bishop_4_4 (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is blk rook" w_king_5_6
-      w_king_5_6 b_rook_0_0 b_rook_0_0;
+      w_king_5_6 b_rook_0_0 (get_color w_king_5_6) b_rook_0_0;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is blk knight" w_king_5_6
-      w_king_5_6 b_knight_4_2 w_king_5_6;
+      w_king_5_6 b_knight_4_2 (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is blk pawn" w_king_5_6
-      w_king_5_6 b_pawn w_king_5_6;
+      w_king_5_6 b_pawn (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is wht queen" w_king_5_6
-      w_king_5_6 w_queen_7_3 w_king_5_6;
+      w_king_5_6 w_queen_7_3 (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is wht bishop" w_king_5_6
-      w_king_5_6 w_bishop_4_4 w_king_5_6;
+      w_king_5_6 w_bishop_4_4 (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p = p2 (w_kng), p3 is wht rook" w_king_5_6
-      w_king_5_6 w_rook_1_4 w_king_5_6;
+      w_king_5_6 w_rook_1_4 (get_color w_king_5_6) w_king_5_6;
     orthog_adj_check_piece_test
       " orthog_check: p is w_kng; p2 is blk queen, p3 is blk bishop"
-      w_king_5_6 b_queen_0_3 b_bishop_4_4 b_queen_0_3;
+      w_king_5_6 b_queen_0_3 b_bishop_4_4 (get_color w_king_5_6)
+      b_queen_0_3;
     (* ATTENTION!!!!!!!!!!!!!!!!!!!! *)
     (* CHECK WITH MAX ON THESE TESTS BELOW *)
     orthog_adj_check_piece_test
       " orthog_check: p is w_kng; p2 is blk bishop, p3 is blk queen"
-      w_king_5_6 b_bishop_4_4 b_queen_0_3 w_king_5_6;
+      w_king_5_6 b_bishop_4_4 b_queen_0_3 (get_color w_king_5_6)
+      w_king_5_6;
     (* ATTENTION!!!!!!!!!!!!!!!!!!!! *)
     (* CHECK WITH MAX ON THESE TESTS BELOW *)
     orthog_adj_check_piece_test
       " orthog_check: p is w_kng; p2 is blk knight, p3 is blk rook"
-      w_king_5_6 b_knight_4_2 b_rook_0_0 w_king_5_6;
+      w_king_5_6 b_knight_4_2 b_rook_0_0 (get_color w_king_5_6)
+      w_king_5_6;
   ]
 
 (* ================================================================ *)
@@ -720,10 +723,10 @@ let orthog_adj_check_piece_tests =
 (* ================================================================ *)
 (* testing to make sure [is_check] works properly. [is_check] calls many
    helpers, so bugs in it could be in any of them. *)
-let knight_check_piece_test name p p2 expected =
+let knight_check_piece_test name p p2 kg_color expected =
   name >:: fun _ ->
   assert_equal expected
-    (knight_check_piece p p2)
+    (knight_check_piece p p2 kg_color)
     ~printer:get_piece_type
 
 let knight_check_piece_tests =
@@ -731,35 +734,35 @@ let knight_check_piece_tests =
   [
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is blk queen" w_king_5_6
-      b_queen_0_3 w_king_5_6;
+      b_queen_0_3 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is blk bishop" w_king_5_6
-      b_bishop_4_4 w_king_5_6;
+      b_bishop_4_4 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p w_kng, p2 is blk rook" w_king_5_6
-      b_rook_0_0 w_king_5_6;
+      b_rook_0_0 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is blk knight" w_king_5_6
-      b_knight_4_2 b_knight_4_2;
+      b_knight_4_2 (get_color w_king_5_6) b_knight_4_2;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is wht knight" w_king_5_6
-      w_knight_4_5 w_king_5_6;
+      w_knight_4_5 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p w_kng, p2 is blk pawn" w_king_5_6 b_pawn
-      w_king_5_6;
+      (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is wht queen" w_king_5_6
-      w_queen_7_3 w_king_5_6;
+      w_queen_7_3 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_kng, p2 is wht bishop" w_king_5_6
-      w_bishop_4_4 w_king_5_6;
+      w_bishop_4_4 (get_color w_king_5_6) w_king_5_6;
     knight_check_piece_test
       " KNIGHT CHECK TEST: p w_kng, p2 is wht rook" w_king_5_6
-      w_rook_1_4 w_king_5_6;
+      w_rook_1_4 (get_color w_king_5_6) w_king_5_6;
     (* when [p] is not a king *)
     knight_check_piece_test
       " KNIGHT CHECK TEST: p is w_queen, p2 is blk knight" w_queen_7_3
-      b_knight_4_2 b_knight_4_2;
+      b_knight_4_2 (get_color w_queen_7_3) b_knight_4_2;
   ]
 
 (* ================================================================ *)
@@ -1024,14 +1027,16 @@ module InCheckTester (Pce : PieceType) = struct
         | OnlyKngt -> true)
     | _ -> failwith "Should never reach this."
 
-  let in_check_test name state piece pce_arrange =
+  let in_check_test name state piece p_color pce_arrange =
     let expected = detrmne_chk pce_arrange Pce.pce_str in
     "     TESTING [in_check]:" ^ name ^ ". [in_check] SHOULD BE "
     ^ (expected |> string_of_bool)
     ^ ". CHECK DIRECTION IS: "
     ^ pos_orient_str pce_arrange
     >:: fun _ ->
-    assert_equal expected (in_check state piece) ~printer:string_of_bool
+    assert_equal expected
+      (in_check state piece p_color)
+      ~printer:string_of_bool
 
   (* THE BELOW TEST WITH ONLY KING AND OTHER PIECE, NO PIECES IN BETWEEN
      THEM *)
@@ -1040,66 +1045,66 @@ module InCheckTester (Pce : PieceType) = struct
       (* THE BLK PCE CIRCLES THE KING IN A CIRCLE ONE GRID AWAY *)
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 2,3/d6; WHT K at 4,3")
-        check_st2 wking_loc43 Vert;
+        check_st2 wking_loc43 (get_color wking_loc43) Vert;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 2,4/e6; WHT K at 4,3")
-        check_st3 wking_loc43 OnlyKngt;
+        check_st3 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 2,5/f6; WHT K at 4,3")
-        check_st4 wking_loc43 Dia;
+        check_st4 wking_loc43 (get_color wking_loc43) Dia;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 3,5/f5; WHT K at 4,3")
-        check_st5 wking_loc43 OnlyKngt;
+        check_st5 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 4,5/f4; WHT K at 4,3")
-        check_st6 wking_loc43 Hori;
+        check_st6 wking_loc43 (get_color wking_loc43) Hori;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 5,5/f3; WHT K at 4,3")
-        check_st7 wking_loc43 OnlyKngt;
+        check_st7 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 6,5/f2; WHT K at 4,3")
-        check_st8 wking_loc43 Dia;
+        check_st8 wking_loc43 (get_color wking_loc43) Dia;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 6,4/e2; WHT K at 4,3")
-        check_st9 wking_loc43 OnlyKngt;
+        check_st9 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 6,3/d2; WHT K at 4,3")
-        check_st10 wking_loc43 Vert;
+        check_st10 wking_loc43 (get_color wking_loc43) Vert;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 6,2/c2 WHT K at 4,3")
-        check_st11 wking_loc43 OnlyKngt;
+        check_st11 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 6,1/b2; WHT K at 4,3")
-        check_st12 wking_loc43 Dia;
+        check_st12 wking_loc43 (get_color wking_loc43) Dia;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 5,1/b3 WHT K at 4,3")
-        check_st13 wking_loc43 OnlyKngt;
+        check_st13 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 4,1/b4; WHT K at 4,3")
-        check_st14 wking_loc43 Hori;
+        check_st14 wking_loc43 (get_color wking_loc43) Hori;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 3,1/b5 WHT K at 4,3")
-        check_st15 wking_loc43 OnlyKngt;
+        check_st15 wking_loc43 (get_color wking_loc43) OnlyKngt;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 2,1/b6; WHT K at 4,3")
-        check_st16 wking_loc43 Dia;
+        check_st16 wking_loc43 (get_color wking_loc43) Dia;
       in_check_test
         (" BLK " ^ Pce.pce_str ^ " at 2,2/c6 WHT K at 4,3")
-        check_st17 wking_loc43 OnlyKngt;
+        check_st17 wking_loc43 (get_color wking_loc43) OnlyKngt;
       (* CASES THAT TRY BLK PIECE FURTHER OR CLOSER THAN 1 GRID BTWN *)
       in_check_test
         (" (MORE THAN 2 GRIDS BTWN K & Q)- BLK " ^ Pce.pce_str
        ^ " at 0,7/h8; WHT K at 4,3")
-        check_st18 wking_loc43 Dia;
+        check_st18 wking_loc43 (get_color wking_loc43) Dia;
       in_check_test
         (" (DIRECTLY UNDER KG) BLK " ^ Pce.pce_str
        ^ " at 5,3/d3; WHT K at 4,3")
-        check_st19 wking_loc43 Vert;
+        check_st19 wking_loc43 (get_color wking_loc43) Vert;
       (* KING IN A CORNER - 0,0/a8 *)
       in_check_test
         (" (KG IN CORNER) BLK " ^ Pce.pce_str
        ^ " at 0,3/d8; WHT K at 0,0")
-        check_st21 wking_loc00 Hori;
+        check_st21 wking_loc00 (get_color wking_loc00) Hori;
     ]
 end
 
