@@ -104,37 +104,64 @@ let update_st_norm_move st sel_pce_loc dest =
 
 (* ======================================================= *)
 
+let list_to_string (lst : (int * int) list) =
+  List.fold_left
+    (fun acc x ->
+      acc ^ "("
+      ^ string_of_int (fst x)
+      ^ ", "
+      ^ string_of_int (snd x)
+      ^ ")   ")
+    "" lst
+
+let king_legal_move (st : t) (p : piece) (dest : int * int) =
+  let newKing = new_loc_piece p dest in
+  if in_check st newKing then false else true
+
 let rec possible_moves_list_acc
     (state : State.t)
     (pieces : ((int * int) * piece) list)
     color
     (destinations : (int * int) list)
     (acc : (int * int) list) =
-  if destinations = [] then acc
-  else
-    match pieces with
-    | [] -> acc
-    | (l, p) :: t ->
+  match pieces with
+  | [] -> acc
+  | (l, p) :: t ->
+      if get_color p = color then
         let unChecked = destinations in
         check_all_dests state l p t color destinations unChecked acc
+      else possible_moves_list_acc state t color destinations acc
 
 and check_all_dests state l p t color destinations unChecked acc =
-  if color = get_color p then
-    match unChecked with
-    | [] -> possible_moves_list_acc state t color destinations acc
-    | k :: m ->
-        if is_legal state p (what_piece state k) then
-          let st_w_move = update_st_norm_move state l k in
-          let is_in_check =
-            in_check st_w_move
-              (find_king st_w_move color |> what_piece st_w_move)
-          in
-          if is_in_check then
-            check_all_dests state l p t color destinations m acc
-          else
-            check_all_dests state l p t color destinations m (k :: acc)
-        else check_all_dests state l p t color destinations m acc
-  else possible_moves_list_acc state t color destinations acc
+  match unChecked with
+  | [] -> possible_moves_list_acc state t color destinations acc
+  | k :: m ->
+      if is_legal state p (what_piece state k) then
+        (* let king = find_king state color |> what_piece state in if p
+           = king && is_legal_castle state p (what_piece state k) =
+           false then if king_legal_move state p k then let () =
+           print_endline "legal" in check_all_dests state l p t color
+           destinations m (k :: acc) else let () = print_endline "not
+           legal" in check_all_dests state l p t color destinations m
+           acc else *)
+        let st_w_move =
+          if is_legal_castle state p (what_piece state k) then
+            update_st_castle state l k
+          else update_st_norm_move state l k
+        in
+        let kingloc =
+          find_king st_w_move color
+          |> what_piece st_w_move |> get_position
+        in
+        let () = print_endline (list_to_string [ kingloc ]) in
+        let is_in_check =
+          in_check st_w_move
+            (find_king st_w_move color |> what_piece st_w_move)
+        in
+        if is_in_check then
+          check_all_dests state l p t color destinations m acc
+        else check_all_dests state l p t color destinations m (k :: acc)
+      else check_all_dests state l p t color destinations m acc
 
 (*[possible_moves_list st pieces color destinations] creates a list of
   all the locations on the board, [destinations], to which pieces on the
@@ -147,11 +174,9 @@ let possible_moves_list st pieces color destinations =
 let checkmate (st : t) color =
   let king = what_piece st (find_king st color) in
   if in_check st king then
-    if can_king_move st king then false
-    else
-      let pos_list = checkpath_list st king in
-      let t = state_to_list st in
-      possible_moves_list st t color pos_list = []
+    let t = state_to_list st in
+    let locs = List.map (fun x -> fst x) t in
+    possible_moves_list st t color locs = []
   else false
 
 let stalemate (st : t) color =
@@ -188,7 +213,12 @@ let rec get_sel_pce_loc state player_turn =
         && get_color piece = player_turn
         && piece_possible_moves state piece != []
       with
-      | true -> input
+      | true ->
+          let () =
+            print_endline
+              (list_to_string (piece_possible_moves state piece))
+          in
+          input
       | false ->
           let () =
             print_endline
@@ -346,6 +376,19 @@ let rec play_game brd st player_turn all_boards =
   let () = print_endline "Current board:" in
   let () = print_board brd in
 
+  let t = state_to_list st in
+  let locs = List.map (fun x -> fst x) t in
+  let moves = possible_moves_list st t player_turn locs in
+
+  let () = print_endline (list_to_string moves) in
+
+  let is_in_check =
+    in_check st (find_king st player_turn |> what_piece st)
+  in
+  let () =
+    print_endline
+      (player_turn ^ " in check: " ^ string_of_bool is_in_check)
+  in
   (* Get [starting loc; dest loc; castle?] in list form *)
   let input_dest = get_input_dest brd st player_turn in
 

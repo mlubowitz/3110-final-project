@@ -150,16 +150,8 @@ let update_loc (st : t) (dest : int * int) (p : piece) =
     in
     update_loc_helper st (get_position p2) p
   else if promotion st p dest then
-    let () =
-      print_endline
-        ("("
-        ^ string_of_int (fst (get_position p))
-        ^ ", "
-        ^ string_of_int (snd (get_position p)))
-    in
-    let () = print_endline (get_color p) in
     update_loc_helper st dest (promotion_piece p)
-  else update_loc_helper st (get_position p2) p
+  else update_loc_helper st dest p
 
 (* ==================reset_en_passant================================ *)
 let rec reset_helper color = function
@@ -185,14 +177,14 @@ let rec verticle_path_empty
     (st : t)
     (loc1 : int * int)
     (loc2 : int * int) =
-  if fst loc1 > fst loc2 + 1 then
-    match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
-    | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
-    | true -> what_piece st (fst loc1 - 1, snd loc1)
-  else if fst loc1 < fst loc2 - 1 then
+  if fst loc1 < fst loc2 - 1 then
     match is_piece (what_piece st (fst loc1 + 1, snd loc1)) with
     | false -> verticle_path_empty st (fst loc1 + 1, snd loc1) loc2
     | true -> what_piece st (fst loc1 + 1, snd loc1)
+  else if fst loc1 > fst loc2 + 1 then
+    match is_piece (what_piece st (fst loc1 - 1, snd loc1)) with
+    | false -> verticle_path_empty st (fst loc1 - 1, snd loc1) loc2
+    | true -> what_piece st (fst loc1 - 1, snd loc1)
   else what_piece st loc2
 
 (* [horizontal_path_empty st loc1 loc2] is true if path from [loc1] to
@@ -350,44 +342,27 @@ let in_check_diagonals (st : t) (p : piece) : piece =
     diagonal_check_helper st p
   else p
 
+let orthog_adj_check_help
+    (st : t)
+    (p : piece)
+    (a : int)
+    (b : int)
+    (end_loc : int * int) =
+  let a, b = get_position p in
+  orthog_adj_check_piece p
+    (piece_in_path st (a, b) (fst end_loc, snd end_loc))
+    (what_piece st (fst end_loc, snd end_loc))
+
 let in_check_orthog_adj (st : t) (p : piece) =
   let a, b = get_position p in
-  if
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (a, 0))
-      (what_piece st (a, 0))
-    != p
-  then
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (a, 0))
-      (what_piece st (a, 0))
-  else if
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (a, 7))
-      (what_piece st (a, 7))
-    != p
-  then
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (a, 7))
-      (what_piece st (a, 7))
-  else if
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (0, b))
-      (what_piece st (0, b))
-    != p
-  then
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (0, b))
-      (what_piece st (0, b))
-  else if
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (7, b))
-      (what_piece st (7, b))
-    != p
-  then
-    orthog_adj_check_piece p
-      (piece_in_path st (a, b) (7, b))
-      (what_piece st (7, b))
+  if orthog_adj_check_help st p a b (a, 0) != p then
+    orthog_adj_check_help st p a b (a, 0)
+  else if orthog_adj_check_help st p a b (a, 7) != p then
+    orthog_adj_check_help st p a b (a, 7)
+  else if orthog_adj_check_help st p a b (0, b) != p then
+    orthog_adj_check_help st p a b (0, b)
+  else if orthog_adj_check_help st p a b (7, b) != p then
+    orthog_adj_check_help st p a b (7, b)
   else p
 
 let in_check_knight (st : t) (p : piece) =
@@ -457,6 +432,7 @@ let is_legal_castle (st : t) (p : piece) (p2 : piece) =
   let p2Fst, p2Snd = get_position p in
   let p3 = castle_side st p2 in
   get_piece_type p = "K"
+  && in_check st p = false
   && abs (pSnd - p2Snd) = 2
   && pFst = p2Fst && can_castle p p3
   && is_path_empty st (get_position p) (get_position p3)
@@ -469,79 +445,18 @@ let is_legal_castle (st : t) (p : piece) (p2 : piece) =
 (*[is_legal st p p2] is [true] if given the state of the board [st],
   piece [p] can move from its current location to the location of [p2]*)
 let is_legal (st : t) (p : piece) (p2 : piece) =
-  if
-    get_piece_type p != "N"
-    && is_path_empty st (get_position p) (get_position p2)
-  then
-    if is_legal_PIECES p p2 = true then true
-    else if get_piece_type p = "P" then is_en_passant st p p2
-    else if get_piece_type p = "K" then is_legal_castle st p p2
+  if is_legal_PIECES p p2 then
+    if get_piece_type p = "N" then true
+    else if is_path_empty st (get_position p) (get_position p2) then
+      if get_piece_type p != "K" then true else in_check st p2 = false
     else false
+  else if get_piece_type p = "P" then is_en_passant st p p2
+  else if get_piece_type p = "K" && is_legal_castle st p p2 then true
   else false
 
 (* ==================possible_moves======================================== *)
 let rec possible_moves t color = "unimplemented"
 
-(* ==================stalemate============================================= *)
-
-let move_up1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 0 then false
-  else
-    let p2 = what_piece st (pFst - 1, pSnd) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_down1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 7 then false
-  else
-    let p2 = what_piece st (pFst + 1, pSnd) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_left1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pSnd = 0 then false
-  else
-    let p2 = what_piece st (pFst, pSnd - 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_right1_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pSnd = 7 then false
-  else
-    let p2 = what_piece st (pFst, pSnd + 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_URdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 0 || pSnd = 7 then false
-  else
-    let p2 = what_piece st (pFst - 1, pSnd + 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_LRdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 7 || pSnd = 7 then false
-  else
-    let p2 = what_piece st (pFst + 1, pSnd + 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_ULdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 0 || pSnd = 0 then false
-  else
-    let p2 = what_piece st (pFst - 1, pSnd - 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let move_LLdiag_helper (st : t) (p1 : piece) (pFst : int) (pSnd : int) =
-  if pFst = 7 || pSnd = 0 then false
-  else
-    let p2 = what_piece st (pFst + 1, pSnd - 1) in
-    is_legal st p1 p2 && in_check st p2 = false
-
-let can_king_move (st : t) (p1 : piece) =
-  let pFst, pSnd = get_position p1 in
-  move_up1_helper st p1 pFst pSnd
-  || move_down1_helper st p1 pFst pSnd
-  || move_left1_helper st p1 pFst pSnd
-  || move_right1_helper st p1 pFst pSnd
-  || move_URdiag_helper st p1 pFst pSnd
-  || move_LRdiag_helper st p1 pFst pSnd
-  || move_ULdiag_helper st p1 pFst pSnd
-  || move_LLdiag_helper st p1 pFst pSnd
 (* ==================checkmate======================================== *)
 
 let is_inbetween l p1 p2 c1 c2 =
