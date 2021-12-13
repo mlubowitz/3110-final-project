@@ -411,6 +411,127 @@ let grd_tests =
 (* ===================================================================== *)
 
 (* ================================================================ *)
+(* ===================TESTING [is_legal_castle] =================== *)
+(* ================================================================ *)
+let st_1 = init_board () |> init_state
+
+let st_2 =
+  (*moves right WHT KNIGHT OUT OF WAY*)
+  what_piece st_1 (grd "g1") |> update_loc st_1 (grd "g4")
+
+let st_3 =
+  (*moves WHT right BISHOP OUT OF WAY*)
+  what_piece st_2 (grd "f1") |> update_loc st_2 (grd "f4")
+
+let st_4 =
+  (*moves WHT LEFT BISHOP OUT OF WAY*)
+  what_piece st_3 (grd "c1") |> update_loc st_3 (grd "c4")
+
+let st_5 =
+  (*moves WHT LEFT KNIGHT OUT OF WAY*)
+  what_piece st_4 (grd "b1") |> update_loc st_4 (grd "b4")
+
+let st_6 =
+  (*moves WHT WHT QUEEN OUT OF WAY*)
+  what_piece st_5 (grd "d1") |> update_loc st_5 (grd "d4")
+
+let st_7 =
+  (*moves WHT WHT PAWN ABOVE KING OUT OF WAY*)
+  what_piece st_6 (grd "e2") |> update_loc st_6 (grd "d3")
+
+let st_8 =
+  (*moves BLK QN so WHT KING is in check*)
+  what_piece st_7 (grd "d8") |> update_loc st_7 (grd "e4")
+
+(* below move to see if path is in check *)
+let st_9 =
+  (*moves WHT PAWN*)
+  what_piece st_8 (grd "f2") |> update_loc st_8 (grd "e3")
+
+let st_10 =
+  (*moves BLK ROOK SO FIRST GRID OF CASTLE PATH TO RIGHT IS IN CHECK*)
+  what_piece st_9 (grd "h8") |> update_loc st_9 (grd "f3")
+
+let st_11 =
+  (*moves BLK ROOK SO FIRST GRID OF CASTLE PATH TO LEFT IS IN CHECK*)
+  what_piece st_10 (grd "f3") |> update_loc st_10 (grd "d3")
+
+(* let st_10 = (*moves WHT WHT KING AWAY AND BACK*) let temp_st =
+   what_piece st_9 (grd "e1") |> first_move |> update_loc st_9 (grd
+   "e3") in what_piece temp_st (grd "e3") |> update_loc temp_st (grd
+   "e1") *)
+
+let is_legal_castle_test name st p p1 expected =
+  name >:: fun _ ->
+  assert_equal expected
+    (is_legal_castle st p p1)
+    ~printer:string_of_bool
+
+let is_legal_castle_tests =
+  (* black box *)
+  [
+    (* no moved pieces, can castle? *)
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if pieces \
+       inbtwn"
+      st_1
+      (what_piece st_1 (grd "e1"))
+      (what_piece st_1 (grd "g1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,2) if pieces \
+       in btwn"
+      st_1
+      (what_piece st_1 (grd "e1"))
+      (what_piece st_1 (grd "c1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN CASTLE move from (7,4) to (7,6) if clear path "
+      st_3
+      (what_piece st_3 (grd "e1"))
+      (what_piece st_3 (grd "g1"))
+      true;
+    is_legal_castle_test
+      " unmoved king CAN CASTLE move from (7,4) to (7,2) if clear path "
+      st_6
+      (what_piece st_6 (grd "e1"))
+      (what_piece st_6 (grd "c1"))
+      true;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if its in \
+       check - otherwise no piece in path and "
+      st_8
+      (what_piece st_8 (grd "e1"))
+      (what_piece st_8 (grd "g1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if the \
+       first square it needs to cross would be in check"
+      st_10
+      (what_piece st_10 (grd "e1"))
+      (what_piece st_10 (grd "g1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,2) if first \
+       square it needs to cross would put it in check"
+      st_11
+      (what_piece st_11 (grd "e1"))
+      (what_piece st_11 (grd "c1"))
+      false;
+    (* |||||||||||||||||||||*)
+    (* is_legal_castle_test " once moved king CAN'T CASTLE move from
+       (7,4) to (7,2) if clear \ path" st_10 (what_piece st_10 (grd
+       "e1")) (what_piece st_10 (grd "c1")) false; is_legal_castle_test
+       " once moved king CAN'T CASTLE move from (7,4) to (7,6) if clear
+       \ path" st_10 (what_piece st_10 (grd "e1")) (what_piece st_10
+       (grd "g1")) false; *)
+  ]
+
+(* ================================================================ *)
+(* ===============FINISH TESTING [is_legal_castle] ================ *)
+(* ================================================================ *)
+
+(* ================================================================ *)
 (* =============TESTING [st_with_two_pces] ======================== *)
 (* ================================================================ *)
 (* tests the function that creates initial state that are used to test
@@ -986,6 +1107,7 @@ let tests =
            orthog_adj_check_piece_tests;
            knight_check_piece_tests;
            piece_in_path_tests;
+           is_legal_castle_tests;
          ]
 
 let _ = run_test_tt_main tests
