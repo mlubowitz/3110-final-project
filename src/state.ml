@@ -255,25 +255,20 @@ let flip_state st = List.map flip_loc st
 let diagonal_check_helper (st : t) (p : piece) =
   let a, b = get_position p in
   if a + b <= 7 then
-    if
+    let diag_ch =
       diag_check_piece p
         (piece_in_path st (a, b) (0, a + b))
         (what_piece st (0, a + b))
-      != p
-    then
-      diag_check_piece p
-        (piece_in_path st (a, b) (0, a + b))
-        (what_piece st (0, a + b)) (*top right diagonal*)
-    else if
-      diag_check_piece p
-        (piece_in_path st (a, b) (a + b, 0))
-        (what_piece st (a + b, 0))
-      != p
-    then
-      diag_check_piece p
-        (piece_in_path st (a, b) (a + b, 0))
-        (what_piece st (a + b, 0))
-    else p (*bottom left diagonal*)
+    in
+    if diag_ch != p then diag_ch (*top right diagonal*)
+    else
+      (* *)
+      let d2 =
+        diag_check_piece p
+          (piece_in_path st (a, b) (a + b, 0))
+          (what_piece st (a + b, 0))
+      in
+      if d2 != p then d2 else p (*bottom left diagonal*)
   else if
     diag_check_piece p
       (piece_in_path st (a, b) (7 - (a - b), 7))
@@ -401,6 +396,7 @@ let in_check_knight (st : t) (p : piece) =
   then knight_check_piece p (what_piece st (a + 2, b + 1))
   else p
 
+(* returns piece that checks king or if no such piece then king *)
 let in_check_piece (st : t) (p : piece) =
   let diagP = in_check_diagonals st p in
   let orthoAdjP = in_check_orthog_adj st p in
@@ -600,3 +596,17 @@ let alphanum_to_num (st : t) (input : string) color =
   | "W" -> white_alphanum_num alphaNum
   | "B" -> black_alphanum_num alphaNum
   | _ -> failwith "not possible"
+
+let castle_allowed state king_loc king_dest =
+  let king_pce = what_piece state king_loc in
+  let king_color = get_color king_pce in
+  let val_dest =
+    match king_color with
+    | "W" -> king_dest = (7, 6) || king_dest = (7, 2)
+    | "B" -> king_dest = (7, 5) || king_dest = (7, 1)
+    | _ -> failwith "This should never be reached."
+  in
+  val_dest
+  && (can_castle king_pce (what_piece state (7, 7))
+     || can_castle king_pce (what_piece state (7, 0)))
+  && is_path_empty state king_loc king_dest

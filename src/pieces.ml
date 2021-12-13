@@ -44,23 +44,14 @@ let get_color p =
 
 let get_en_passant p = p.en_passant
 
-let piece_picture (p : piece) =
-  match (p.piece_type, p.color) with
-  | Pawn, White -> "♙"
-  | Pawn, Black -> "♟︎"
-  | Bishop, White -> "♗"
-  | Bishop, Black -> "♝"
-  | Knight, White -> "♘"
-  | Knight, Black -> "♞"
-  | Rook, White -> "♖"
-  | Rook, Black -> "♜"
-  | Queen, White -> "♕"
-  | Queen, Black -> "♛"
-  | King, White -> "♔"
-  | King, Black -> "♚"
-  | _ -> " "
-
 exception Illegal of string
+
+(* let piece_picture (p : piece) = match (p.piece_type, p.color) with |
+   Pawn, White -> "♙" | Pawn, Black -> "♟︎" | Bishop, White -> "♗" |
+   Bishop, Black -> "♝" | Knight, White -> "♘" | Knight, Black -> "♞" |
+   Rook, White -> "♖" | Rook, Black -> "♜" | Queen, White -> "♕" |
+   Queen, Black -> "♛" | King, White -> "♔" | King, Black -> "♚" | _ ->
+   " " *)
 
 let is_piece (p : piece) = p.piece_type != None
 
@@ -200,8 +191,6 @@ let king_is_legal ori_loc new_loc =
   abs (fst ori_loc - fst new_loc) <= 1
   && abs (snd ori_loc - snd new_loc) <= 1
 
-let id x = x
-
 let is_legal_PIECES (p : piece) (p2 : piece) =
   let a, b = get_position p2 in
   if a < 0 || a > 7 || b < 0 || b > 7 then false
@@ -232,11 +221,8 @@ let en_passant_false (p : piece) = { p with en_passant = false }
 let new_loc_piece (p : piece) (new_loc : int * int) =
   { p with position = new_loc }
 
-let piece_check_checker (p : piece) (p2 : piece) (p3 : piece) =
-  if p = p2 then p3 else p2
-
 let diag_check_piece (p : piece) (p2 : piece) (p3 : piece) =
-  let pp = piece_check_checker p p2 p3 in
+  let pp = if p = p2 then p3 else p2 in
   if p.color = pp.color then p
   else if
     pp.piece_type = Queen || pp.piece_type = Bishop
@@ -245,7 +231,7 @@ let diag_check_piece (p : piece) (p2 : piece) (p3 : piece) =
   else p
 
 let orthog_adj_check_piece (p : piece) (p2 : piece) (p3 : piece) =
-  let pp = piece_check_checker p p2 p3 in
+  let pp = if p = p2 then p3 else p2 in
   if p.color = pp.color then p
   else if pp.piece_type = Rook || pp.piece_type = Queen then pp
   else p
