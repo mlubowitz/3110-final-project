@@ -1141,6 +1141,27 @@ module KnightInCheckTests = InCheckTester (Knight)
 (* ========== FINISH TESTING [in_check] =========================== *)
 (* ================================================================ *)
 
+(* ================================================================ *)
+(* ======================TESTING [checkmate] ====================== *)
+(* ================================================================ *)
+(* let checkmate_test name state kg_color expected = name >:: fun _ ->
+   assert_equal expected (checkmate state kg_color) *)
+
+let checkmate_tests =
+  (* black box *)
+  [
+    (* path vertical to above *)
+    piece_in_path_test
+      "PIECE_IN_PATH TEST: Piece btwn R at (7,7)/h1 and P at (1,7)/h7 \
+       is P at (6,7)/h2"
+      st_1 (grd "h1") (grd "h7")
+      (what_piece st_1 (grd "h2"));
+  ]
+
+(* ================================================================ *)
+(* ==================FINSIH TESTING [checkmate] =================== *)
+(* ================================================================ *)
+
 let tests =
   "test suite for Chess"
   >::: List.flatten

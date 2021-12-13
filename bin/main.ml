@@ -203,10 +203,8 @@ let rec get_sel_pce_loc state player_turn =
         && piece_possible_moves state piece != []
       with
       | true ->
-          let () =
-            print_endline
-              (list_to_string (piece_possible_moves state piece))
-          in
+          (* let () = print_endline (list_to_string
+             (piece_possible_moves state piece)) in *)
           input
       | false ->
           let () =
