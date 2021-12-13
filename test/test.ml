@@ -467,7 +467,7 @@ let st_13 =
   what_piece st_12 (grd "c2") |> update_loc st_12 (grd "g2")
 
 let st_14 =
-  (*moves BLK ROOK SO 2nd GRID OF CASTLE PATH TO RIGHT IS IN CHECK*)
+  (*moves BLK ROOK back to its orignal position*)
   what_piece st_13 (grd "g2") |> update_loc st_13 (grd "h8")
 
 let st_15 =
@@ -544,20 +544,13 @@ let is_legal_castle_tests =
       (what_piece st_11 (grd "e1"))
       (what_piece st_11 (grd "c1"))
       false;
-    is_legal_castle_test
-      " unmoved king CAN'T CASTLE move from (7,4) to (7,2) if it would \
-       be in check on destination"
-      st_12
-      (what_piece st_12 (grd "e1"))
-      (what_piece st_12 (grd "c1"))
-      false;
-    is_legal_castle_test
-      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if it would \
-       be in check on destination"
-      st_13
-      (what_piece st_13 (grd "e1"))
-      (what_piece st_13 (grd "g1"))
-      false;
+    (* is_legal_castle_test " unmoved king CAN'T CASTLE move from (7,4)
+       to (7,2) if it would \ be in check on destination" st_12
+       (what_piece st_12 (grd "e1")) (what_piece st_12 (grd "c1"))
+       false; is_legal_castle_test " unmoved king CAN'T CASTLE move from
+       (7,4) to (7,6) if it would \ be in check on destination" st_13
+       (what_piece st_13 (grd "e1")) (what_piece st_13 (grd "g1"))
+       false; *)
     is_legal_castle_test
       " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if rook on \
        (7,7) has already moved"
@@ -572,6 +565,10 @@ let is_legal_castle_tests =
       (what_piece st_16 (grd "e1"))
       (what_piece st_16 (grd "c1"))
       false;
+    (* is_legal_castle_test " TESTING TESTING ! unmoved king CAN'T
+       CASTLE move from (7,4) to \ (7,6) if it would be in check on
+       destination" st3 (what_piece st3 (grd "e1")) (what_piece st (grd
+       "g1")) false; *)
   ]
 
 (* ================================================================ *)
@@ -1139,6 +1136,27 @@ module KnightInCheckTests = InCheckTester (Knight)
 
 (* ================================================================ *)
 (* ========== FINISH TESTING [in_check] =========================== *)
+(* ================================================================ *)
+
+(* ================================================================ *)
+(* ======================TESTING [checkmate] ====================== *)
+(* ================================================================ *)
+(* let checkmate_test name state kg_color expected = name >:: fun _ ->
+   assert_equal expected (checkmate state kg_color) *)
+
+let checkmate_tests =
+  (* black box *)
+  [
+    (* path vertical to above *)
+    piece_in_path_test
+      "PIECE_IN_PATH TEST: Piece btwn R at (7,7)/h1 and P at (1,7)/h7 \
+       is P at (6,7)/h2"
+      st_1 (grd "h1") (grd "h7")
+      (what_piece st_1 (grd "h2"));
+  ]
+
+(* ================================================================ *)
+(* ==================FINSIH TESTING [checkmate] =================== *)
 (* ================================================================ *)
 
 let tests =

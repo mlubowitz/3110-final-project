@@ -114,6 +114,10 @@ val str_to_grid : string -> location
 val grid_to_str : location -> string
 (**[grid_to_str loc] converts a int * int tuple to a string. *)
 
+val checkmate : Chess.State.t -> string -> bool
+(**[checkmat st c] is true if the king of color [c] is in checkmate in
+   state st. False otherwise. *)
+
 (* val get_updateinfo : updateinfo -> bool *)
 (* This function may be needed to reduce code duplication. *)
 
