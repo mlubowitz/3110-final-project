@@ -454,12 +454,37 @@ let st_10 =
 
 let st_11 =
   (*moves BLK ROOK SO FIRST GRID OF CASTLE PATH TO LEFT IS IN CHECK*)
-  what_piece st_10 (grd "f3") |> update_loc st_10 (grd "d3")
+  what_piece st_10 (grd "f3") |> update_loc st_10 (grd "d2")
 
-(* let st_10 = (*moves WHT WHT KING AWAY AND BACK*) let temp_st =
-   what_piece st_9 (grd "e1") |> first_move |> update_loc st_9 (grd
-   "e3") in what_piece temp_st (grd "e3") |> update_loc temp_st (grd
-   "e1") *)
+let st_12 =
+  (*moves BLK ROOK SO 2nd GRID OF CASTLE PATH TO LEFT IS IN CHECK*)
+  what_piece st_11 (grd "d2") |> update_loc st_11 (grd "c2")
+
+let st_13 =
+  (*moves BLK ROOK SO 2nd GRID OF CASTLE PATH TO RIGHT IS IN CHECK*)
+  what_piece st_12 (grd "c2") |> update_loc st_12 (grd "g2")
+
+let st_14 =
+  (*moves BLK ROOK SO 2nd GRID OF CASTLE PATH TO RIGHT IS IN CHECK*)
+  what_piece st_13 (grd "g2") |> update_loc st_13 (grd "h8")
+
+let st_15 =
+  (*moves WHITE ROOK TO LEFT ONCE and puts back*)
+  let temp_st =
+    what_piece st_14 (grd "h1")
+    |> first_move
+    |> update_loc st_14 (grd "h3")
+  in
+  what_piece temp_st (grd "h3") |> update_loc temp_st (grd "h1")
+
+let st_16 =
+  (*moves WHT WHT KING AWAY AND BACK*)
+  let temp_st =
+    what_piece st_15 (grd "e1")
+    |> first_move
+    |> update_loc st_15 (grd "e2")
+  in
+  what_piece temp_st (grd "e2") |> update_loc temp_st (grd "e1")
 
 let is_legal_castle_test name st p p1 expected =
   name >:: fun _ ->
@@ -518,13 +543,34 @@ let is_legal_castle_tests =
       (what_piece st_11 (grd "e1"))
       (what_piece st_11 (grd "c1"))
       false;
-    (* |||||||||||||||||||||*)
-    (* is_legal_castle_test " once moved king CAN'T CASTLE move from
-       (7,4) to (7,2) if clear \ path" st_10 (what_piece st_10 (grd
-       "e1")) (what_piece st_10 (grd "c1")) false; is_legal_castle_test
-       " once moved king CAN'T CASTLE move from (7,4) to (7,6) if clear
-       \ path" st_10 (what_piece st_10 (grd "e1")) (what_piece st_10
-       (grd "g1")) false; *)
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,2) if it would \
+       be in check on destination"
+      st_12
+      (what_piece st_12 (grd "e1"))
+      (what_piece st_12 (grd "c1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if it would \
+       be in check on destination"
+      st_13
+      (what_piece st_13 (grd "e1"))
+      (what_piece st_13 (grd "g1"))
+      false;
+    is_legal_castle_test
+      " unmoved king CAN'T CASTLE move from (7,4) to (7,6) if rook on \
+       (7,7) has already moved"
+      st_15
+      (what_piece st_15 (grd "e1"))
+      (what_piece st_15 (grd "g1"))
+      false;
+    is_legal_castle_test
+      " MOVED king CAN'T CASTLE move from (7,4) to (7,2) even with \
+       unmoved rook on (7,0) and clear path"
+      st_16
+      (what_piece st_16 (grd "e1"))
+      (what_piece st_16 (grd "c1"))
+      false;
   ]
 
 (* ================================================================ *)
