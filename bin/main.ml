@@ -114,10 +114,6 @@ let list_to_string (lst : (int * int) list) =
       ^ ")   ")
     "" lst
 
-let king_legal_move (st : t) (p : piece) (dest : int * int) =
-  let newKing = new_loc_piece p dest in
-  if in_check st newKing (get_color newKing) then false else true
-
 let rec possible_moves_list_acc
     (state : State.t)
     (pieces : ((int * int) * piece) list)
@@ -147,6 +143,7 @@ and check_all_dests state l p t color destinations unChecked acc =
             (find_king st_w_move color |> what_piece st_w_move)
             color
         in
+        let () = print_endline (string_of_bool is_in_check) in
         if is_in_check then
           check_all_dests state l p t color destinations m acc
         else check_all_dests state l p t color destinations m (k :: acc)
