@@ -52,16 +52,16 @@ val is_legal_castle : t -> Pieces.piece -> Pieces.piece -> bool
 (**[is_legal_castle st p p2] is [true] if the king can castle moving
    from its location at p to the location of p2 and [false] otherwise*)
 
+val in_check_piece : t -> Pieces.piece -> Pieces.piece
+(**[in_check_piece st p] is the first piece it finds that is check piece
+   [p] and not piece exists it is [p]*)
+
 val in_check : t -> Pieces.piece -> bool
 (**[in_check st p] returns [true] if the king is in check *)
 
 val find_king : t -> string -> int * int
 (** [fing_king st c] is the location of the king with color [c] in state
     [st]. Colors are "W", "B", or "N" (no color).*)
-
-val can_king_move : t -> Pieces.piece -> bool
-(**[can_piece_move st p] is true if a piece has any legal moves on the
-   board*)
 
 val checkpath_list : t -> Pieces.piece -> (int * int) list
 (**[checkpath_list st p] is the list of all positions on the board

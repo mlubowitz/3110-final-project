@@ -132,5 +132,3 @@ let promote_piece board ori_loc new_loc (piece_type : string) =
   let () = board.(n_row).(n_col) <- "[" ^ piece_type ^ "]" in
   let () = board.(ori_row).(ori_col) <- "[ ]" in
   Array.copy board
-
-(* ==================all_boards======================================== *)
