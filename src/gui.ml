@@ -1,5 +1,6 @@
 open Pieces
 open Graphics
+open State
 
 type rectangle = string
 
@@ -130,7 +131,8 @@ let new_board () =
   draw_matrix 75 75 80 8 8 true;
   notation 80 53 55
 
-let draw_string_loc x y str =
+let draw_string_loc x y bl str =
+  if bl then set_color black else set_color white;
   moveto x y;
   draw_string str
 
@@ -144,13 +146,15 @@ let matrix_notation_to_string_loc_x notation =
 
 let matrix_notation_to_string_loc_y notation =
   let y_pos = fst notation in
-  (y_pos * 80) + 185
+  665 - (y_pos * 80)
 
 let position_piece notation piece =
+  let color = if get_color piece = "B" then true else false in
   let draw_string_piece =
     draw_string_loc
       (matrix_notation_to_string_loc_x notation)
       (matrix_notation_to_string_loc_y notation)
+      color
   in
   match get_piece_type piece with
   | "P" -> draw_string_piece "PAWN"
@@ -161,34 +165,68 @@ let position_piece notation piece =
   | "K" -> draw_string_piece "KING"
   | _ -> ()
 
-let rec new_board_with_pieces a_list =
+(*let position_piece_test notation piece = let draw_string_piece =
+  draw_string_loc (matrix_notation_to_string_loc_x notation)
+  (matrix_notation_to_string_loc_y notation) in match piece with | "P"
+  -> draw_string_piece "PAWN" | "B" -> draw_string_piece "BISHOP" | "N"
+  -> draw_string_piece "KNIGHT" | "R" -> draw_string_piece "ROOK" | "Q"
+  -> draw_string_piece "QUEEN" | "K" -> draw_string_piece "KING" | _ ->
+  ()*)
+
+(*let rec new_board_with_pieces a_list = new_board (); match a_list with
+  | [] -> () | h :: t -> position_piece_test (fst h) (snd h);
+  new_board_with_pieces t*)
+let new_board_with_pieces a_list x_pos y_pos =
   new_board ();
-  match a_list with
-  | [] -> ()
-  | h :: t ->
-      position_piece (fst h) (snd h);
-      new_board_with_pieces t
+  let rec draw_through_y single_x_pos single_y_pos =
+    match single_y_pos with
+    | -1 -> ()
+    | y ->
+        position_piece (single_x_pos, y)
+          (what_piece a_list (single_x_pos, y));
+        draw_through_y single_x_pos (y - 1)
+  in
+  let rec draw_through_x curr_x =
+    match curr_x with
+    | -1 -> ()
+    | x ->
+        draw_through_y x y_pos;
+        draw_through_x (x - 1)
+  in
+  draw_through_x x_pos
 
 let conv_to_x coor = (coor - 75) / 80
 
 let conv_to_y coor = 7 - conv_to_x coor
 
-let conv_to_loc =
+let conv_to_loc st =
+  new_board_with_pieces st 7 7;
   let det_position =
     match wait_next_event [ Button_down ] with
     | { mouse_x; mouse_y } -> (mouse_x, mouse_y)
   in
   (conv_to_y (snd det_position), conv_to_x (fst det_position))
 
-let promotion () =
+let promotion_gui () =
   board_background 75 75 640 (rgb 0 0 0);
   board_background 315 315 160 (rgb 255 255 255);
   moveto 310 520;
   draw_string "Select a piece to promote to!";
   set_color black;
-  draw_string_loc 335 355 "Queen";
-  draw_string_loc 415 355 "Rook";
-  draw_string_loc 335 435 "Bishop";
-  draw_string_loc 415 435 "Knight"
-
-let x = promotion ()
+  draw_string_loc 335 355 true "Queen";
+  draw_string_loc 415 355 true "Rook";
+  draw_string_loc 335 435 true "Bishop";
+  draw_string_loc 415 435 true "Knight";
+  let det_position =
+    match wait_next_event [ Button_down ] with
+    | { mouse_x; mouse_y } -> (mouse_x, mouse_y)
+  in
+  let fst_det_pos = fst det_position in
+  let snd_det_pos = snd det_position in
+  if
+    fst_det_pos < 315 || fst_det_pos > 475 || snd_det_pos < 315
+    || snd_det_pos > 475
+  then "reselect"
+  else if fst_det_pos < 395 then if snd_det_pos < 395 then "Q" else "B"
+  else if snd_det_pos < 395 then "R"
+  else "N"

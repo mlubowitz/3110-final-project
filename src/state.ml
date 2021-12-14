@@ -97,8 +97,8 @@ let rec promotion_piece p =
     print_endline "";
     print_endline
       "Pawn promotion: choose a replacement inputing as a string 'P' \n\
-      \         for pawn, 'N' Knight, 'B' for bishop, 'R' for Rook, or \
-       'Q' for Queen";
+      \ for pawn, 'N' Knight, 'B' for bishop, 'R' for Rook, or  'Q' for\n\
+      \  Queen";
     print_string ">"
   in
   let input = read_line () in
@@ -112,7 +112,7 @@ let rec promotion_piece p =
   | x ->
       let () =
         print_endline
-          "Not a piece. Input location of piece you want to select.";
+          "Not a piece. Input location of piece you want\n  to select.";
         print_string ">"
       in
       promotion_piece p

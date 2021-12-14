@@ -11,7 +11,7 @@ test:
 
 play:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
-
+	
 bisect: bisect-clean
 	-dune exec --instrument-with bisect_ppx --force test/test.exe
 	bisect-ppx-report html

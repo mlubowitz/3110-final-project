@@ -2,6 +2,7 @@ open Chess
 open Board
 open State
 open Pieces
+open Gui
 
 type location = int * int
 
@@ -182,8 +183,17 @@ let piece_possible_moves (st : t) (p : piece) =
 
 (* ======================================================= *)
 
+(*let rec get_sel_pce_loc state player_turn = let input = read_line ()
+  |> str_to_grid in match what_piece state input with | exception
+  InvalidLocation e -> let () = print_endline "Not valid board location.
+  Input another location."; print_string ">" in get_sel_pce_loc state
+  player_turn | p -> ( let piece = p in match is_piece piece &&
+  get_color piece = player_turn && piece_possible_moves state piece !=
+  [] with | true -> input | false -> let () = print_endline "Not a valid
+  piece. Input location of piece you want to \ select."; print_string
+  ">" in get_sel_pce_loc state player_turn)*)
 let rec get_sel_pce_loc state player_turn =
-  let input = read_line () |> str_to_grid in
+  let input = conv_to_loc state in
   match what_piece state input with
   | exception InvalidLocation e ->
       let () =
@@ -219,12 +229,17 @@ let select_piece st player_turn =
   let () =
     print_endline "";
     print_endline
-      "Select piece you want to move by inputting its location in \
-       EXACT format (row,column). Upper left is (0,0) and bottom right \
-       is (7,7). NO SPACES!";
+      "Select piece you want to move by inputting its location\n\
+      \  in  EXACT format (row,column). Upper left is (0,0) and bottom \
+       right is (7,7). NO SPACES!";
     print_string ">"
   in
   get_sel_pce_loc st player_turn
+
+(*let select_piece st player_turn = let () = print_endline "";
+  print_endline "Select piece you want to move by inputting its location
+  in \ EXACT format (row,column). Upper left is (0,0) and bottom right \
+  is (7,7). NO SPACES!"; print_string ">" in conv_to_loc st*)
 
 (* ============================================================ *)
 
@@ -255,8 +270,21 @@ let rec get_pce_on_dest state dest =
 
 (* =================================================== *)
 
+(*let rec get_dest_loc brd state sel_pce_loc player_turn = let dest =
+  read_line () in match dest with | "reselect" | "'reselect'" -> let
+  new_pce = select_piece state player_turn in let () = print_endline "";
+  print_endline ("CURRENTLY SELECTED PIECE: " ^ get_str_piece brd
+  new_pce ^ " at " ^ grid_to_str new_pce) in let () = print_endline
+  "Input destination location in EXACT format (row,column). \ Upper\n\ \
+  left\n\ \ is (0,0) and bottom right is (7,7). NO SPACES! Or type \
+  'reselect' to\n\ \ select a different piece."; print_string ">" in
+  get_dest_loc brd state new_pce player_turn | x -> chk_castl_and_legl
+  brd state sel_pce_loc x player_turn*)
+
 let rec get_dest_loc brd state sel_pce_loc player_turn =
-  let dest = read_line () in
+  (*make a new board and then convert?*)
+  let dest_click = conv_to_loc state in
+  let dest = grid_to_str dest_click in
   match dest with
   | "reselect"
   | "'reselect'" ->
@@ -264,15 +292,21 @@ let rec get_dest_loc brd state sel_pce_loc player_turn =
       let () =
         print_endline "";
         print_endline
-          ("CURRENTLY SELECTED PIECE: "
+          ("CURRENTLY\n\n SELECTED PIECE: "
           ^ get_str_piece brd new_pce
           ^ " at " ^ grid_to_str new_pce)
       in
       let () =
         print_endline
-          "Input destination location in EXACT format (row,column). \
-           Upper left is (0,0) and bottom right is (7,7). NO SPACES! \
-           Or type 'reselect' to select a different piece.";
+          "Input destination\n\
+          \  location in\n\
+          \  EXACT format\n\
+          \ (row,column). Upper left is (0,0) and\n\
+          \  bottom right\n\
+          \  is\n\
+          \ (7,7). NO SPACES! Or type 'reselect' to\n\
+          \  select a different\n\
+          \ piece.";
         print_string ">"
       in
       get_dest_loc brd state new_pce player_turn
@@ -427,13 +461,7 @@ let rec play_game brd st player_turn all_boards =
     let () = print_endline "" in
     let () = print_endline "Next player - board flipped: " in
     let () = print_board brd in
-    let () =
-      print_endline "";
-      print_endline "Keep playing? y or n"
-    in
-    let keep_play = keep_playing () in
-    if keep_play = "y" then play_game brd st player_turn all_boards
-    else print_endline "Goodbye!"
+    play_game brd st player_turn all_boards
 
 (* ================================================================== *)
 
