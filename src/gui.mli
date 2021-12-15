@@ -1,3 +1,4 @@
+open Pieces
 (** Functions for graphical user interface *)
 
 val color_rec : int -> int -> int -> bool -> unit
@@ -17,3 +18,11 @@ val init_setup : int -> int -> int -> unit
 
 val init : unit
 (** [init] creates a window and initializes board*)
+
+val new_board_with_pieces : State.t -> int -> int -> unit
+
+val new_board : unit -> unit
+
+val conv_to_loc : State.t -> int * int
+
+val promotion_gui : unit -> string
