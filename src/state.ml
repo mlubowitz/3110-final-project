@@ -130,14 +130,12 @@ let update_board
       move_piece brd sel_pce_loc (fst sel_pce_loc, snd dest)
     in
     move_piece capture (fst sel_pce_loc, snd dest) dest
-  else if prmtion then
-    let piece = what_piece st dest in
-    let piece_type = get_piece_type piece in
-    let () = print_endline piece_type in
-    if get_color piece = "W" then
-      let piece_type = String.lowercase_ascii piece_type in
-      promote_piece brd sel_pce_loc dest piece_type
-    else promote_piece brd sel_pce_loc dest piece_type
+    (* else if prmtion then let piece = what_piece st dest in let
+       piece_type = get_piece_type piece in let () = print_endline
+       piece_type in if get_color piece = "W" then let piece_type =
+       String.lowercase_ascii piece_type in promote_piece brd
+       sel_pce_loc dest piece_type else promote_piece brd sel_pce_loc
+       dest piece_type *)
   else move_piece brd sel_pce_loc dest
 
 (* ==================update_loc================================ *)
@@ -150,8 +148,8 @@ let update_loc (st : t) (dest : int * int) (p : piece) =
         p
     in
     update_loc_helper st (get_position p2) p
-  else if promotion st p dest then
-    update_loc_helper st dest (promotion_piece p)
+    (* else if promotion st p dest then update_loc_helper st dest
+       (promotion_piece p) *)
   else update_loc_helper st dest p
 
 (* ==================reset_en_passant================================ *)
@@ -274,14 +272,14 @@ let diagonal_check_helper (st : t) (p : piece) color =
       if d2 != p then d2 else p (*bottom left diagonal*)
   else if
     diag_check_piece p
-      (piece_in_path st (a, b) (7 - (a - b), 7))
-      (what_piece st (7 - (a - b), 7))
+      (piece_in_path st (a, b) (a + b - 7, 7))
+      (what_piece st (a + b - 7, 7))
       color
     != p
   then
     diag_check_piece p
-      (piece_in_path st (a, b) (7 - (a - b), 7))
-      (what_piece st (7 - (a - b), 7))
+      (piece_in_path st (a, b) (a + b - 7, 7))
+      (what_piece st (a + b - 7, 7))
       color (*top right diagonal*)
   else if
     diag_check_piece p
@@ -424,9 +422,9 @@ let in_check_piece (st : t) (p : piece) color =
   else p
 
 let in_check (st : t) (p : piece) color =
-  let checkPiece = in_check_piece st p color in
-  if get_piece_type checkPiece = "K" then false
-  else checkPiece != p && get_color p != get_color checkPiece
+  let cp = in_check_piece st p color in
+  if get_piece_type cp = "K" then false
+  else cp != p && get_color p != get_color cp
 
 (* ==================find_king======================================== *)
 let rec find_king t color =

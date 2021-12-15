@@ -138,12 +138,8 @@ and check_all_dests state l p t color destinations unChecked acc =
             update_st_castle state l k
           else update_st_norm_move state l k
         in
-        let is_in_check =
-          in_check st_w_move
-            (find_king st_w_move color |> what_piece st_w_move)
-            color
-        in
-        let () = print_endline (string_of_bool is_in_check) in
+        let king = find_king st_w_move color |> what_piece st_w_move in
+        let is_in_check = in_check st_w_move king color in
         if is_in_check then
           check_all_dests state l p t color destinations m acc
         else check_all_dests state l p t color destinations m (k :: acc)
@@ -162,7 +158,11 @@ let checkmate (st : t) color =
   if in_check st king color then
     let t = state_to_list st in
     let locs = List.map (fun x -> fst x) t in
-    possible_moves_list st t color locs = []
+    let posmoves = possible_moves_list st t color locs in
+    let () =
+      print_endline ("Checkmate moves left " ^ list_to_string posmoves)
+    in
+    List.length posmoves = 0
   else false
 
 let stalemate (st : t) color =
@@ -200,8 +200,10 @@ let rec get_sel_pce_loc state player_turn =
         && piece_possible_moves state piece != []
       with
       | true ->
-          (* let () = print_endline (list_to_string
-             (piece_possible_moves state piece)) in *)
+          let () =
+            print_endline
+              (list_to_string (piece_possible_moves state piece))
+          in
           input
       | false ->
           let () =
@@ -421,8 +423,6 @@ let rec play_game brd st player_turn all_boards =
   if checkmate st player_turn then
     if player_turn = "W" then print_endline "Checkmate! Black Wins"
     else print_endline "Checkmate! White Wins"
-  else if stalemate st player_turn || insufficient_material st then
-    print_endline "Game Over. Stalemate."
   else
     let () = print_endline "" in
     let () = print_endline "Next player - board flipped: " in
