@@ -142,12 +142,11 @@ let update_board
 let update_loc (st : t) (dest : int * int) (p : piece) =
   let p2 = what_piece st dest in
   if is_en_passant st p p2 then
-    let st =
-      update_loc_helper st
-        (fst (get_position p), snd (get_position p2))
-        p
+    let st_w_move =
+      update_loc_helper st (fst (get_position p), snd dest) p
     in
-    update_loc_helper st (get_position p2) p
+    let newP = what_piece st_w_move (fst (get_position p), snd dest) in
+    update_loc_helper st_w_move dest newP
     (* else if promotion st p dest then update_loc_helper st dest
        (promotion_piece p) *)
   else update_loc_helper st dest p
@@ -438,7 +437,8 @@ let rec find_king t color =
 (*[is_legal_castle st p p2] returns if the king can castle moving from
   its location at p to the location of p2 *)
 let castle_side (st : t) (p2 : piece) =
-  if get_position p2 = (7, 6) then what_piece st (7, 7)
+  if get_position p2 = (7, 6) || get_position p2 = (7, 5) then
+    what_piece st (7, 7)
   else what_piece st (7, 0)
 
 let is_legal_castle (st : t) (p : piece) (p2 : piece) =
