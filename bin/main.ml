@@ -160,9 +160,8 @@ let checkmate (st : t) color =
     let t = state_to_list st in
     let locs = List.map (fun x -> fst x) t in
     let posmoves = possible_moves_list st t color locs in
-    let () =
-      print_endline ("Checkmate moves left " ^ list_to_string posmoves)
-    in
+    (* let () = print_endline ("Checkmate moves left " ^ list_to_string
+       posmoves) in *)
     List.length posmoves = 0
   else false
 
@@ -210,10 +209,8 @@ let rec get_sel_pce_loc state player_turn =
         && piece_possible_moves state piece != []
       with
       | true ->
-          let () =
-            print_endline
-              (list_to_string (piece_possible_moves state piece))
-          in
+          (* let () = print_endline (list_to_string
+             (piece_possible_moves state piece)) in *)
           input
       | false ->
           let () =
@@ -230,11 +227,10 @@ let rec get_sel_pce_loc state player_turn =
 let select_piece st player_turn =
   let () =
     print_endline "";
-    print_endline
-      "Select piece you want to move by inputting its location\n\
-      \  in  EXACT format (row,column). Upper left is (0,0) and bottom \
-       right is (7,7). NO SPACES!";
-    print_string ">"
+    print_endline "Select piece you want to move."
+    (*by inputting its location\n\ \ in EXACT format (row,column). Upper
+      left is (0,0) and bottom \ right is (7,7). NO SPACES!*)
+    (* print_string ">" *)
   in
   get_sel_pce_loc st player_turn
 
@@ -299,16 +295,10 @@ let rec get_dest_loc brd state sel_pce_loc player_turn =
           ^ " at " ^ grid_to_str new_pce)
       in
       let () =
-        print_endline
-          "Input destination\n\
-          \  location in\n\
-          \  EXACT format\n\
-          \ (row,column). Upper left is (0,0) and\n\
-          \  bottom right\n\
-          \  is\n\
-          \ (7,7). NO SPACES! Or type 'reselect' to\n\
-          \  select a different\n\
-          \ piece.";
+        print_endline "Input destination location."
+        (*in\n\ \ EXACT format\n\ \ (row,column). Upper left is (0,0)
+          and\n\ \ bottom right\n\ \ is\n\ \ (7,7). NO SPACES! Or type
+          'reselect' to\n\ \ select a different\n\ \ piece.*);
         print_string ">"
       in
       get_dest_loc brd state new_pce player_turn
@@ -330,7 +320,8 @@ and chk_castl_and_legl brd state sel_pce_loc dest_inpt player_turn =
       let () =
         print_endline
           "Your selected piece cannot move to that location. Input new \
-           destination location or type 'reselect'.";
+           destination location."
+        (*or type 'reselect'.*);
         print_string ">"
       in
       get_dest_loc brd state sel_pce_loc player_turn
@@ -349,10 +340,11 @@ let get_dest brd state sel_pce_loc player_turn =
       ^ " at " ^ grid_to_str sel_pce_loc)
   in
   let () =
-    print_endline
-      "Input destination location in EXACT format (row,column). Upper \
-       left is (0,0) and bottom right is (7,7). NO SPACES!";
-    print_endline "Or type 'reselect' to select a different piece.";
+    print_endline "Input destination location"
+    (*in EXACT format (row,column). Upper \ left is (0,0) and bottom
+      right is (7,7). NO SPACES!*);
+    (* print_endline "Or type 'reselect' to select a different
+       piece."; *)
     print_string ">"
   in
   get_dest_loc brd state sel_pce_loc player_turn
@@ -385,15 +377,12 @@ let rec play_game brd st player_turn all_boards =
   let locs = List.map (fun x -> fst x) t in
   let moves = possible_moves_list st t player_turn locs in
 
-  let () = print_endline (list_to_string moves) in
-
+  (* let () = print_endline (list_to_string moves) in *)
   let is_in_check =
     in_check st (find_king st player_turn |> what_piece st) player_turn
   in
-  let () =
-    print_endline
-      (player_turn ^ " in check: " ^ string_of_bool is_in_check)
-  in
+  (* let () = print_endline (player_turn ^ " in check: " ^
+     string_of_bool is_in_check) in *)
   (* Get [starting loc; dest loc; castle?] in list form *)
   let input_dest = get_input_dest brd st player_turn in
 
