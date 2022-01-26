@@ -9,6 +9,6 @@ Contributors include Max Lubowitz, Vishaak Raghupathy, Brendan Zheng
 
 First, clone the repository with
 
-git clone https://github.coecis.cornell.edu/hwr26/chess.git
+git clone https://github.com/mlubowitz/3110-final-project.git
 
-Then, follow the additional installation instructions in INSTALL.md
+Then, follow the additional installation instructions in INSTALL.txt
